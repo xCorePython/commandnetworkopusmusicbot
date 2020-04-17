@@ -29,7 +29,7 @@ owner = 637677317967052807
 // If you do not set this, the prefix will be a mention of the bot (@Botname play)
 // If you make this blank, the bot will not use a prefix
 
-prefix = "s!""
+prefix = "s!"
 
 
 // If you set this, it modifies the default game of the bot
