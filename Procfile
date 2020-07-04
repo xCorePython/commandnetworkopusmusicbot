@@ -1,1 +1,1 @@
-commandnetworkmusic: java -jar JMusicBot-0.2.7-Windows.jar
+musicbot: java -jar JMusicBot-0.2.9-Windows.jar
