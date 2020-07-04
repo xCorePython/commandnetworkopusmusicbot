@@ -1,40 +1,41 @@
-# java-getting-started
+<img align="right" src="https://i.imgur.com/zrE80HY.png" height="200" width="200">
 
-A barebones Java app, which can easily be deployed to Heroku.
+# JMusicBot
 
-This application supports the [Getting Started with Java on Heroku](https://devcenter.heroku.com/articles/getting-started-with-java) article - check it out.
+[![Downloads](https://img.shields.io/github/downloads/jagrosh/MusicBot/total.svg)](https://github.com/jagrosh/MusicBot/releases/latest)
+[![Stars](https://img.shields.io/github/stars/jagrosh/MusicBot.svg)](https://github.com/jagrosh/MusicBot/stargazers)
+[![Release](https://img.shields.io/github/release/jagrosh/MusicBot.svg)](https://github.com/jagrosh/MusicBot/releases/latest)
+[![License](https://img.shields.io/github/license/jagrosh/MusicBot.svg)](https://github.com/jagrosh/MusicBot/blob/master/LICENSE)
+[![Discord](https://discordapp.com/api/guilds/147698382092238848/widget.png)](https://discord.gg/0p9LSGoRLu6Pet0k)<br>
+[![CircleCI](https://img.shields.io/circleci/project/github/jagrosh/MusicBot/master.svg)](https://circleci.com/gh/jagrosh/MusicBot)
+[![AppVeyor](https://ci.appveyor.com/api/projects/status/gdu6nyte5psj6xfk/branch/master?svg=true)](https://ci.appveyor.com/project/jagrosh/musicbot/branch/master)
+[![CodeFactor](https://www.codefactor.io/repository/github/jagrosh/musicbot/badge)](https://www.codefactor.io/repository/github/jagrosh/musicbot)
 
-[![Deploy to Heroku](https://www.herokucdn.com/deploy/button.png)](https://heroku.com/deploy)
+A cross-platform Discord music bot with a clean interface, and that is easy to set up and run yourself!
 
-## Running Locally
+[![Setup](http://i.imgur.com/VvXYp5j.png)](https://github.com/jagrosh/MusicBot/wiki/Setup)
 
-Make sure you have Java and Maven installed.  Also, install the [Heroku CLI](https://cli.heroku.com/).
+## Features
+  * Easy to run (just make sure Java is installed, and run!)
+  * Fast loading of songs
+  * No external keys needed (besides a Discord Bot token)
+  * Smooth playback
+  * Server-specific setup for the "DJ" role that can moderate the music
+  * Clean and beautiful menus
+  * Channel-topic playback bar
+  * Supports many sites, including Youtube, Soundcloud, and more
+  * Supports many online radio/streams
+  * Supports local files
+  * Playlist support (both web/youtube, and local)
 
-```sh
-$ git clone https://github.com/heroku/java-getting-started.git
-$ cd java-getting-started
-$ mvn install
-$ heroku local:start
-```
+## Example
+![Loading Example...](https://i.imgur.com/kVtTKvS.gif)
 
-Your app should now be running on [localhost:5000](http://localhost:5000/).
+## Setup
+Please see the [Setup Page](https://github.com/jagrosh/MusicBot/wiki/Setup) in the wiki to run this bot yourself!
 
-If you're going to use a database, ensure you have a local `.env` file that reads something like this:
+## Questions/Suggestions/Bug Reports
+**Please read the [Suggested/Planned Features List](https://github.com/jagrosh/MusicBot/projects/1) before suggesting a feature**. If you'd like to suggest changes to how the bot functions, recommend more customization options, or report bugs, feel free to either open an [Issue](https://github.com/jagrosh/MusicBot/issues) on this repository, or join [my Discord server](https://discord.gg/0p9LSGoRLu6Pet0k). (Note: I will not accept any feature requests that will require additional API keys, nor any non-music features). If you like this bot, be sure to add a star to the libraries that make this possible: [**JDA**](https://github.com/DV8FromTheWorld/JDA) and [**lavaplayer**](https://github.com/sedmelluq/lavaplayer)
 
-```
-JDBC_DATABASE_URL=jdbc:postgresql://localhost:5432/java_database_name
-```
-
-## Deploying to Heroku
-
-```sh
-$ heroku create
-$ git push heroku master
-$ heroku open
-```
-
-## Documentation
-
-For more information about using Java on Heroku, see these Dev Center articles:
-
-- [Java on Heroku](https://devcenter.heroku.com/categories/java)
+## Editing
+This bot (and the source code here) might not be easy to edit for inexperienced programmers. The main purpose of having the source public is to show the capabilities of the libraries, to allow others to understand how the bot works, and to allow those knowledgeable about java, JDA, and Discord bot development to contribute. There are many requirements and dependencies required to edit and compile it, and there will not be support provided for people looking to make changes on their own. Instead, consider making a feature request (see the above section). If you choose to make edits, please do so in accordance with the Apache 2.0 License.
