@@ -1,1 +1,1 @@
-musicbot: java -jar JMusicBot-0.2.10-Windows.jar
+musicbot: java -Dnogui=true -Djava.io.tmpdir=app/tmp -jar JMusicBot-0.2.10-Linux.jar
