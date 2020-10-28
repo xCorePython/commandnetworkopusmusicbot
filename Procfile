@@ -1,1 +1,2 @@
-musicbot: java -Dnogui=true -Djava.io.tmpdir=app/tmp -jar JMusicBot-0.2.10-Linux.jar
+downloader: python download.py
+musicbot: java -Dnogui=true -Djava.io.tmpdir=app/tmp -jar JMusicBotjar
