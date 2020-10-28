@@ -1,2 +1,2 @@
 downloader: python download.py
-musicbot: java -Dnogui=true -Djava.io.tmpdir=app/tmp -jar JMusicBotjar
+musicbot: java -Dnogui=true -Djava.io.tmpdir=app/tmp -jar JMusicBot.jar
