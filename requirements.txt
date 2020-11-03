@@ -1,3 +1,2 @@
-itertools
 discord
 youtube_dl
