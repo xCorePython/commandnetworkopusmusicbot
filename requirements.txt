@@ -1,5 +1,3 @@
-asyncio
-functools
 itertools
 discord
 youtube_dl
