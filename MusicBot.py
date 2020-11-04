@@ -158,7 +158,7 @@ class Song:
     def create_embed(self):
         embed = (discord.Embed(title='Now playing',
                                color=discord.Color.blurple())
-                 .add_field(name='Title', value='[{}]({0.source.url})'.format(0.source.title), inline=False)
+                 .add_field(name='Title', value='[{0.source.title}]({0.source.url})'.format(self), inline=False)
                  .add_field(name='Duration', value=self.source.duration, inline=False)
                  .add_field(name='Requested by', value=self.requester.mention, inline=False)
                  .add_field(name='Uploader', value='[{0.source.uploader}]({0.source.uploader_url})'.format(self), inline=False)
