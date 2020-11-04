@@ -127,7 +127,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
                 except IndexError:
                     raise YTDLError('Couldn\'t retrieve any matches for `{}`'.format(webpage_url))
 
-        return cls(ctx, discord.FFmpegPCMAudio(info['url'], **cls.FFMPEG_OPTIONS), data=info)
+        return cls(ctx, discord.FFmpegOpusAudio(info['url'], **cls.FFMPEG_OPTIONS), data=info)
 
     @staticmethod
     def parse_duration(duration: int):
@@ -137,7 +137,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
 
         duration = []
         if days > 0:
-            duration.append('{}d'.format(days))
+            duration.append('{}d '.format(days))
         if hours > 0:
             duration.append('{}:'.format(hours))
         if minutes > 0:
@@ -145,7 +145,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
         if seconds > 0:
             duration.append('{}'.format(seconds))
 
-        return ', '.join(duration)
+        return ''.join(duration)
 
 
 class Song:
@@ -157,12 +157,11 @@ class Song:
 
     def create_embed(self):
         embed = (discord.Embed(title='Now playing',
-                               description='```css\n{0.source.title}\n```'.format(self),
                                color=discord.Color.blurple())
-                 .add_field(name='Duration', value=self.source.duration)
-                 .add_field(name='Requested by', value=self.requester.mention)
-                 .add_field(name='Uploader', value='[{0.source.uploader}]({0.source.uploader_url})'.format(self))
-                 .add_field(name='URL', value='[Click]({0.source.url})'.format(self))
+                 .add_field(name='Title', value='[{}]({0.source.url})'.format(0.source.title), inline=False)
+                 .add_field(name='Duration', value=self.source.duration, inline=False)
+                 .add_field(name='Requested by', value=self.requester.mention, inline=False)
+                 .add_field(name='Uploader', value='[{0.source.uploader}]({0.source.uploader_url})'.format(self), inline=False)
                  .set_thumbnail(url=self.source.thumbnail))
 
         return embed
