@@ -133,7 +133,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
                 except IndexError:
                     raise YTDLError('Couldn\'t retrieve any matches for `{}`'.format(webpage_url))
 
-        return cls(ctx, discord.FFmpegPCMAudio(info['url'], **cls.FFMPEG_OPTIONS), data=info)
+        return cls(ctx, discord.FFmpegOpusAudio(info['url'], **cls.FFMPEG_OPTIONS, bitrate=200, executable='ffmpeg'), data=info)
 
     @staticmethod
     def parse_duration(duration: int):
