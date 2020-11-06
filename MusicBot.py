@@ -64,7 +64,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
 
     FFMPEG_OPTIONS = {
         'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5',
-        'options': '-vn -ab 224k',
+        'options': '-vn -codec:a libfdk_aac -vbr 5',
     }
 
     ytdl = youtube_dl.YoutubeDL(YTDL_OPTIONS)
@@ -515,7 +515,7 @@ class Music(commands.Cog):
                 raise commands.CommandError('Bot is already in a voice channel.')
 
 
-bot = commands.Bot('Cn!', description='Yet another music bot.')
+bot = commands.Bot('Cn!', help=None)
 bot.add_cog(Music(bot))
 
 
