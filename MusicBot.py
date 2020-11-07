@@ -22,7 +22,7 @@ import itertools
 import math
 import random
 
-import discord
+import discord, requests
 import youtube_dl, bs4, os, urllib
 from async_timeout import timeout
 from discord.ext import commands
