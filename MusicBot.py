@@ -23,7 +23,7 @@ import math
 import random
 
 import discord
-import youtube_dl
+import youtube_dl, bs4, os, urllib
 from async_timeout import timeout
 from discord.ext import commands
 
@@ -54,11 +54,17 @@ class YTDLSource(discord.PCMVolumeTransformer):
         'no_warnings': True,
         'default_search': 'auto',
         'source_address': '0.0.0.0',
+        'postprocessors': [
+        {'key': 'FFmpegExtractAudio',
+        'preferredcodec': 'mp3',
+         'preferredquality': '320'},
+        {'key': 'FFmpegMetadata'},
+    ],
     }
 
     FFMPEG_OPTIONS = {
         'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5',
-        'options': '-vn -vbr on -b:a 200k',
+        'options': '-vn',
     }
 
     ytdl = youtube_dl.YoutubeDL(YTDL_OPTIONS)
@@ -126,8 +132,16 @@ class YTDLSource(discord.PCMVolumeTransformer):
                     info = processed_info['entries'].pop(0)
                 except IndexError:
                     raise YTDLError('Couldn\'t retrieve any matches for `{}`'.format(webpage_url))
+          
+        url = 'https://www.320youtube.com/v11/watch?v={}'.format(info['id'])
+        title = info['id']
+        result = requests.get(url)
+        soup = bs4.BeautifulSoup(result.text, 'html.parser')
+        dllink = str(str(soup).split('href=')[8])[1:].split('" rel')[0]
+        urllib.request.urlretrieve(dllink, '{}.mp3'.format(title))
+        os.system('ffmpeg -i {0}.mp3 -c:a libopus -b:a 320k {0}.opus'.format(title))
 
-        return cls(ctx, discord.FFmpegPCMAudio(info['url'], **cls.FFMPEG_OPTIONS), data=info)
+        return cls(ctx, discord.FFmpegOpusAudio('{0}.opus'.format(info['id']), **cls.FFMPEG_OPTIONS), data=info)
 
     @staticmethod
     def parse_duration(duration: int):
