@@ -64,7 +64,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
 
     FFMPEG_OPTIONS = {
         'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5',
-        'options': '-vn',
+        'options': '-vn -reconnect 5 -reconnect_streamed 4 -reconnect_delay_max 20',
     }
 
     ytdl = youtube_dl.YoutubeDL(YTDL_OPTIONS)
@@ -498,8 +498,7 @@ class Music(commands.Cog):
         A list of these sites can be found here: https://rg3.github.io/youtube-dl/supportedsites.html
         """
 
-        if not ctx.voice_state.voice:
-            await ctx.invoke(self._join)
+        
 
         async with ctx.typing():
             try:
@@ -507,6 +506,8 @@ class Music(commands.Cog):
             except YTDLError as e:
                 await ctx.send('An error occurred while processing this request: {}'.format(str(e)))
             else:
+                if not ctx.voice_state.voice:
+                    await ctx.invoke(self._join)
                 song = Song(source)
 
                 await ctx.voice_state.songs.put(song)
