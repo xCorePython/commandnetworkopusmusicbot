@@ -63,8 +63,8 @@ class YTDLSource(discord.PCMVolumeTransformer):
     }
 
     FFMPEG_OPTIONS = {
-        'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5',
-        'options': '-vn -reconnect 5 -reconnect_streamed 4 -reconnect_delay_max 20',
+        'before_options': '-reconnect 5 -reconnect_streamed 5 -reconnect_delay_max 25',
+        'options': '-vn',
     }
 
     ytdl = youtube_dl.YoutubeDL(YTDL_OPTIONS)
@@ -139,7 +139,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
         soup = bs4.BeautifulSoup(result.text, 'html.parser')
         dllink = str(str(soup).split('href=')[8])[1:].split('" rel')[0]
         urllib.request.urlretrieve(dllink, '{}.mp3'.format(title))
-        os.system('ffmpeg -i {0}.mp3 -c:a libopus -b:a 320k {0}.opus'.format(title))
+        os.system('ffmpeg -i {0}.mp3 -c:a libopus -b:a 320k -reconnect 5 {0}.opus'.format(title))
 
         return cls(ctx, discord.FFmpegOpusAudio('{0}.opus'.format(info['id']), **cls.FFMPEG_OPTIONS), data=info)
 
