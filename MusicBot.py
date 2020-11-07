@@ -139,7 +139,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
         soup = bs4.BeautifulSoup(result.text, 'html.parser')
         dllink = str(str(soup).split('href=')[8])[1:].split('" rel')[0]
         urllib.request.urlretrieve(dllink, '{}.mp3'.format(title))
-        os.system('ffmpeg -i {0}.mp3 -c:a libopus -b:a 320k -reconnect 5 {0}.opus'.format(title))
+        os.system('ffmpeg -i {0}.mp3 -c:a libopus -b:a 320k -vn -stimeout 1000000 {0}.opus'.format(title))
 
         return cls(ctx, discord.FFmpegOpusAudio('{0}.opus'.format(info['id']), **cls.FFMPEG_OPTIONS), data=info)
 
@@ -503,7 +503,6 @@ class Music(commands.Cog):
         async with ctx.typing():
             try:
                 source = await YTDLSource.create_source(ctx, search, loop=self.bot.loop)
-                await asyncio.sleep(15)
             except YTDLError as e:
                 await ctx.send('An error occurred while processing this request: {}'.format(str(e)))
             else:
