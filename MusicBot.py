@@ -22,7 +22,7 @@ import itertools
 import math
 import random
 
-import discord, requests
+import discord
 import youtube_dl, bs4, os, urllib
 from async_timeout import timeout
 from discord.ext import commands
@@ -39,27 +39,18 @@ class YTDLError(Exception):
     pass
 
 
-class YTDLSource:
+class YTDLSource(discord.PCMVolumeTransformer):
     YTDL_OPTIONS = {
         'format': 'bestaudio/best',
         'extractaudio': True,
         'audioformat': 'opus',
         'outtmpl': '%(id)s.%(ext)s',
-        'restrictfilenames': True,
         'noplaylist': True,
         'nocheckcertificate': True,
-        'ignoreerrors': False,
-        'logtostderr': False,
         'quiet': True,
         'no_warnings': True,
         'default_search': 'auto',
         'source_address': '0.0.0.0',
-        'postprocessors': [
-        {'key': 'FFmpegExtractAudio',
-        'preferredcodec': 'mp3',
-         'preferredquality': '320'},
-        {'key': 'FFmpegMetadata'},
-    ],
     }
 
     FFMPEG_OPTIONS = {
@@ -69,7 +60,7 @@ class YTDLSource:
 
     ytdl = youtube_dl.YoutubeDL(YTDL_OPTIONS)
 
-    def __init__(self, ctx: commands.Context, source: discord.FFmpegOpusAudio, *, data: dict, volume: float = 0.5):
+    def __init__(self, ctx: commands.Context, source: discord.FFmpegPCMAudio, *, data: dict, volume: float = 0.5):
         super().__init__(source, volume)
 
         self.requester = ctx.author
@@ -132,16 +123,8 @@ class YTDLSource:
                     info = processed_info['entries'].pop(0)
                 except IndexError:
                     raise YTDLError('Couldn\'t retrieve any matches for `{}`'.format(webpage_url))
-          
-        url = 'https://www.320youtube.com/v11/watch?v={}'.format(info['id'])
-        title = info['id']
-        result = requests.get(url)
-        soup = bs4.BeautifulSoup(result.text, 'html.parser')
-        dllink = str(str(soup).split('href=')[8])[1:].split('" rel')[0]
-        urllib.request.urlretrieve(dllink, '{}.mp3'.format(title))
-        os.system('ffmpeg -i {0}.mp3 -c:a libopus -b:a 320k -loglevel fatal {0}.opus'.format(title))
 
-        return cls(ctx, discord.FFmpegOpusAudio('{0}.opus'.format(info['id']), bitrate=320), data=info)
+        return cls(ctx, discord.FFmpegOpusAudio('{0}.opus'.format(info['url']), bitrate=320), data=info)
 
     @staticmethod
     def parse_duration(duration: int):
@@ -500,8 +483,6 @@ class Music(commands.Cog):
 
         if not ctx.voice_state.voice:
             await ctx.invoke(self._join)
-        
-        
 
         async with ctx.typing():
             try:
@@ -525,7 +506,7 @@ class Music(commands.Cog):
                 raise commands.CommandError('Bot is already in a voice channel.')
 
 
-bot = commands.Bot('Cn!', help=None)
+bot = commands.Bot('Cn!', help_command=None)
 bot.add_cog(Music(bot))
 
 
