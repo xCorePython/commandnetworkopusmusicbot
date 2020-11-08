@@ -39,11 +39,11 @@ class YTDLError(Exception):
     pass
 
 
-class YTDLSource(discord.OpusVolumeTransformer):
+class YTDLSource(discord.PCMVolumeTransformer):
     YTDL_OPTIONS = {
         'format': 'bestaudio/best',
         'extractaudio': True,
-        'audioformat': 'mp3',
+        'audioformat': 'opus',
         'outtmpl': '%(id)s.%(ext)s',
         'restrictfilenames': True,
         'noplaylist': True,
