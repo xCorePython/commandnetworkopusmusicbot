@@ -22,7 +22,7 @@ import itertools
 import math
 import random
 
-import discord, requests
+import discord
 import youtube_dl, bs4, os, urllib
 from async_timeout import timeout
 from discord.ext import commands
@@ -63,7 +63,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
     }
 
     FFMPEG_OPTIONS = {
-        'before_options': '-reconnect 5 -reconnect_streamed 5 -reconnect_delay_max 25',
+        'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5',
         'options': '-vn',
     }
 
@@ -139,9 +139,9 @@ class YTDLSource(discord.PCMVolumeTransformer):
         soup = bs4.BeautifulSoup(result.text, 'html.parser')
         dllink = str(str(soup).split('href=')[8])[1:].split('" rel')[0]
         urllib.request.urlretrieve(dllink, '{}.mp3'.format(title))
-        os.system('ffmpeg -i {0}.mp3 -c:a libopus -b:a 320k -vn -stimeout 1000000 {0}.opus'.format(title))
+        os.system('ffmpeg -i {0}.mp3 -c:a libopus -b:a 320k -loglevel fatal {0}.opus'.format(title))
 
-        return cls(ctx, discord.FFmpegOpusAudio('{0}.opus'.format(info['id']), **cls.FFMPEG_OPTIONS), data=info)
+        return cls(ctx, discord.FFmpegOpusAudio('{0}.opus'.format(info['id']), bitrate=320), data=info)
 
     @staticmethod
     def parse_duration(duration: int):
@@ -498,16 +498,18 @@ class Music(commands.Cog):
         A list of these sites can be found here: https://rg3.github.io/youtube-dl/supportedsites.html
         """
 
+        if not ctx.voice_state.voice:
+            await ctx.invoke(self._join)
+        
         
 
         async with ctx.typing():
             try:
+                await ctx.send('Converting to opus...')
                 source = await YTDLSource.create_source(ctx, search, loop=self.bot.loop)
             except YTDLError as e:
                 await ctx.send('An error occurred while processing this request: {}'.format(str(e)))
             else:
-                if not ctx.voice_state.voice:
-                    await ctx.invoke(self._join)
                 song = Song(source)
 
                 await ctx.voice_state.songs.put(song)
