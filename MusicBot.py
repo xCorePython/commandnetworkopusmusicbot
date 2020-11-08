@@ -39,7 +39,7 @@ class YTDLError(Exception):
     pass
 
 
-class YTDLSource():
+class YTDLSource:
     YTDL_OPTIONS = {
         'format': 'bestaudio/best',
         'extractaudio': True,
