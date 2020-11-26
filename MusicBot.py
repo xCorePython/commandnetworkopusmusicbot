@@ -66,7 +66,7 @@ def now_date(mode, location):
 		month = now.month
 		if hour > 24:
 			hour2 = hour / 24
-			hour = hour - hour2 * 24
+			hour = int(hour - hour2 * 24)
 			day = day + 1
 			if day > now_month('month'):
 				month = month + 1
