@@ -175,7 +175,7 @@ class Queue:
 q = Queue()
 
 def conver(info):
-	ydl = youtube_dl.YoutubeDL(ydl_opts3)
+	ydl = youtube_dl.YoutubeDL(ydl_opts)
 	for n in range(1, 10):
 		try:
 		    if info.startswith('https://'):
@@ -273,6 +273,7 @@ first = ['Not Converted']
 
 @client.event
 async def on_ready():
+	print('Bot Started')
 	if len(first) == 1:
 		print('Loading queue...')
 		links = await create_queue(774525604116037662)
