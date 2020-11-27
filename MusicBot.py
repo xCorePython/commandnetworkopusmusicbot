@@ -170,25 +170,6 @@ class Queue:
 			
 q = Queue()
 
-def conver(info):
-	ydl = youtube_dl.YoutubeDL(ydl_opts)
-	for n in range(1, 10):
-		try:
-		    if info.startswith('https://'):
-		        info_dict = ydl.extract_info(info, download=True, process=True)
-		        os.system("ffmpeg -i {}.webm -vn -ac 2 -b:a 320k -acodec libopus -loglevel quiet -f libopus {}.opus".format(info_dict['id']))
-		        q.add(info_dict)
-		        return info_dict
-		    else:
-		        info_dict = ydl.extract_info("ytsearch:{}".format(info), download=True, process=True)
-		        os.system("ffmpeg -i {}.webm -vn -a:b 320k -ac 2 -acodec libopus -loglevel quiet -f libopus {}.opus".format(info_dict['entries'][0]['id']))
-		        q.add(info_dict['entries'][0])
-		        return info_dict['entries'][0]
-		    break
-		except:
-		    return 'Failed'
-
-
 async def commands(command, message):
 	arg = message.content.split(' ')[1:]
 	if command == 'nowplaying':
@@ -266,6 +247,24 @@ def stop(voice):
 
 def play(queue, voice):
     voice.play(discord.FFmpegOpusAudio('{0}.opus'.format(queue[0]['id']), bitrate=320))
+
+def conver(info):
+	ydl = youtube_dl.YoutubeDL(ydl_opts)
+	for n in range(1, 10):
+		try:
+		    if info.startswith('https://'):
+		        info_dict = ydl.extract_info(info, download=True, process=True)
+		        os.system("ffmpeg -i {}.webm -vn -ac 2 -b:a 320k -acodec libopus -loglevel quiet -f opus {}.opus".format(info_dict['id']))
+		        q.add(info_dict)
+		        return info_dict
+		    else:
+		        info_dict = ydl.extract_info("ytsearch:{}".format(info), download=True, process=True)
+		        os.system("ffmpeg -i {}.webm -vn -a:b 320k -ac 2 -acodec libopus -loglevel quiet -f opus {}.opus".format(info_dict['entries'][0]['id']))
+		        q.add(info_dict['entries'][0])
+		        return info_dict['entries'][0]
+		    break
+		except:
+		    return 'Failed'
 
 first = ['Not Converted']
 
