@@ -254,12 +254,12 @@ def conver(info):
 		try:
 		    if info.startswith('https://'):
 		        info_dict = ydl.extract_info(info, download=True, process=True)
-		        os.system("ffmpeg -i {}.webm -vn -ac 2 -b:a 320k -acodec libopus -loglevel quiet -f opus {}.opus".format(info_dict['id']))
+		        os.system("ffmpeg -i {}.webm -vn -b:a 320000 -a:c libopus -loglevel quiet {}.opus".format(info_dict['id']))
 		        q.add(info_dict)
 		        return info_dict
 		    else:
 		        info_dict = ydl.extract_info("ytsearch:{}".format(info), download=True, process=True)
-		        os.system("ffmpeg -i {}.webm -vn -a:b 320k -ac 2 -acodec libopus -loglevel quiet -f opus {}.opus".format(info_dict['entries'][0]['id']))
+		        os.system("ffmpeg -i {}.webm -vn -b:a 320000 -a:c libopus -loglevel quiet {}.opus".format(info_dict['entries'][0]['id']))
 		        q.add(info_dict['entries'][0])
 		        return info_dict['entries'][0]
 		    break
