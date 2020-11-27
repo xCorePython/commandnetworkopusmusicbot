@@ -11,6 +11,7 @@ ydl_opts = {
     'outtmpl': "%(id)s" + '.%(ext)s',
     'ignoreerrors': True,
     'noplaylist': True,
+    'quiet': True,
 }
 
 def now_month(mode):
@@ -116,11 +117,9 @@ class Queue:
 		self.np = 0
 		self.queue = []
 		self.voice = None
-
 	def add(self, value):
 		value['bitrate'] = int(str(subprocess.run("ffprobe -print_format json -show_format {}.opus".format(value['id']), stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, text=True).stdout).split('"bit_rate": "')[1].split('"')[0])
 		self.queue.append(value)
-	
 	def remove(self, value):
 		try:
 			del self.queue[int(value)]
@@ -153,12 +152,16 @@ class Queue:
 	def skip(self, value):
 		if len(self.queue) == 1:
 			stop(self.voice)
+			self.start = now_date('off', 9)
+			self.start2 = now_date('on', 9)
 			play(self.queue, self.voice)
 		if value == 1:
 			self.played = self.queue[0]
 			self.queue = self.queue[1:]
 			self.queue.append(self.played)
 			stop(self.voice)
+			self.start = now_date('off', 9)
+			self.start2 = now_date('on', 9)
 			play(self.queue, self.voice)
 		else:
 			for n in range(value):
@@ -166,6 +169,8 @@ class Queue:
 				self.queue = self.queue[1:]
 				self.queue.append(self.played)
 			stop(self.voice)
+			self.start = now_date('off', 9)
+			self.start2 = now_date('on', 9)
 			play(self.queue, self.voice)
 			
 q = Queue()
