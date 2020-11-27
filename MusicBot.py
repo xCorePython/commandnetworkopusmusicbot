@@ -1,4 +1,4 @@
-import discord, youtube_dl, subprocess, calendar, datetime
+import discord, youtube_dl, subprocess, calendar, datetime, os
 
 sys_token = 'NzYxOTI5NDgxNDIxOTc5NjY5.X3hwIA.ItlW0Q2Fej-OyNdbfUKO2czZQvk'
 sys_loop = 1
@@ -176,12 +176,12 @@ def conver(info):
 		try:
 		    if info.startswith('https://'):
 		        info_dict = ydl.extract_info(info, download=True, process=True)
-		        subprocess.run("ffmpeg -i {}.webm -vn -ac 2 -acodec libopus -f libopus {}.opus".format(info_dict['id']), shell=True)
+		        os.system("ffmpeg -i {}.webm -vn -ac 2 -b:a 320k -acodec libopus -loglevel quiet -f libopus {}.opus".format(info_dict['id']))
 		        q.add(info_dict)
 		        return info_dict
 		    else:
 		        info_dict = ydl.extract_info("ytsearch:{}".format(info), download=True, process=True)
-		        subprocess.run("ffmpeg -i {}.webm -vn -ac 2 -acodec libopus -f libopus {}.opus".format(info_dict['entries'][0]['id']), shell=True)
+		        os.system("ffmpeg -i {}.webm -vn -a:b 320k -ac 2 -acodec libopus -loglevel quiet -f libopus {}.opus".format(info_dict['entries'][0]['id']))
 		        q.add(info_dict['entries'][0])
 		        return info_dict['entries'][0]
 		    break
