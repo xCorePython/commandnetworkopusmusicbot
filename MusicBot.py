@@ -1,4 +1,4 @@
-import discord, youtube_dl, subprocess, calendar, datetime, asyncio
+import discord, youtube_dl, subprocess, calendar, datetime
 
 sys_token = 'NzYxOTI5NDgxNDIxOTc5NjY5.X3hwIA.ItlW0Q2Fej-OyNdbfUKO2czZQvk'
 sys_loop = 1
@@ -8,14 +8,12 @@ vcch = 734217960222228490
 vcch = 584262828807028746
 ydl_opts = {
     'format': 'bestaudio/best',
+    'extractaudio': True,
+    'audioformat': 'opus',
+    'audioquality': '320',
     'outtmpl': "%(id)s" + '.%(ext)s',
     'ignoreerrors': True,
     'noplaylist': True,
-    'postprocessors': [{
-            'key': 'FFmpegExtractAudio',
-            'preferredcodec': 'opus',
-            'preferredquality': '320'},
-        {'key': 'FFmpegMetadata'},],
 }
 
 def now_month(mode):
