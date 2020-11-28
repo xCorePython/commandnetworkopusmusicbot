@@ -5,7 +5,7 @@ sys_loop = 1
 command_prefix = 'c.'
 client = discord.Client()
 vcch = 734217960222228490
-#vcch = 584262828807028746
+vcch = 584262828807028746
 ydl_opts = {
     'format': 'bestaudio/best',
     'outtmpl': "%(id)s" + '.%(ext)s',
@@ -302,7 +302,7 @@ async def on_ready():
 		print('Loading queue...')
 		links = str(await create_queue(774525604116037662)).split('\n')
 		for n in range(len(links)):
-		    conver(link[n])
+		    conver(links[n])
 		print('Loaded queue')
 		first.append('Converted')
 	voice = client.get_channel(vcch).guild.voice_client
