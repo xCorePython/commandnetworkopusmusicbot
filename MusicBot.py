@@ -175,13 +175,10 @@ class Queue:
 			self.start = now_date('off', 9)
 			self.start2 = now_date('on', 9)
 			self.play()
-	def volume(self, value):
-		self.volume = value
-		self.voice.volume = value
 	def stop(self):
 		self.voice.stop()
 	def play(self):
-		self.voice.play(discord.PCMVolumeTransformer(discord.FFmpegOpusAudio('{0}.opus'.format(self.queue[0]['id']), bitrate=512), volume=self.volume))
+		self.voice.play(discord.FFmpegOpusAudio('{0}.opus'.format(self.queue[0]['id']), bitrate=512))
 
 q = Queue()
 
@@ -219,13 +216,6 @@ async def commands(command, message):
 			sendms.set_thumbnail(url=str(info['thumbnails'][len(info['thumbnails']) - 1]['url']))
 			sendms.set_footer(text='Extracted from {}'.format(info['extractor']))
 			await message.channel.send(embed=sendms)
-	elif command == 'volume':
-		arg = message.content.split(' ')
-		if 0 < int(arg[1]) <= 100:
-			q.volume(int(value)/ 100)
-			await message.channel.send(':white_check_mark: **Successfully set volume {}%**'.format(arg[1]))
-		else:
-			await message.channel.send('**Please between 0-100**')
 	elif command == 'skip':
 		arg = message.content.split(' ')
 		if len(arg) == 1:
@@ -317,7 +307,8 @@ async def on_ready():
 		    conver(link)
 		print('Loaded queue')
 		first.append('Converted')
-	await client.get_channel(vcch).connect()
+	if not voice.is_connected():
+		await client.get_channel.connect()
 	voice = client.get_channel(vcch).guild.voice_client
 	q.set(voice)
 	q.start()
