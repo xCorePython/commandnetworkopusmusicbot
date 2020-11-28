@@ -178,9 +178,17 @@ class Queue:
 	def stop(self):
 		self.voice.stop()
 	def play(self):
-		self.voice.play(discord.FFmpegOpusAudio('{0}.opus'.format(self.queue[0]['id']), bitrate=512))
+		self.voice.play(discord.FFmpegOpusAudio('{0}.opus'.format(self.queue[0]['id']), bitrate=320))
 
 q = Queue()
+
+async def save():
+    messages = await client.get_channel(774525604116037662).history(limit=1).flatten()
+    queues = []
+    for n in range(len(q.np1)):
+    	queues.append('https://youtu.be/{}'.format(queue[n]['id']))
+    for message in messages:
+    	await message.edit(content='\n'.join(queues))
 
 async def commands(command, message):
 	arg = message.content.split(' ')[1:]
@@ -216,6 +224,7 @@ async def commands(command, message):
 			sendms.set_thumbnail(url=str(info['thumbnails'][len(info['thumbnails']) - 1]['url']))
 			sendms.set_footer(text='Extracted from {}'.format(info['extractor']))
 			await message.channel.send(embed=sendms)
+			await save()
 	elif command == 'skip':
 		arg = message.content.split(' ')
 		if len(arg) == 1:
@@ -234,6 +243,7 @@ async def commands(command, message):
 		arg = message.content.split(' ')
 		q.remove(int(arg[1]))
 		await message.channel.send(':white_check_mark: **Removed**')
+		await save(l)
 	elif command == 'join':
 	    await client.get_channel(vcch).connect()
 	    await message.channel.send(':white_check_mark: **Joined**')
@@ -261,38 +271,29 @@ def search(url):
 		try:
 			if url.startswith('https://'):
 				info_dict = youtube_dl.YoutubeDL().extract_info(info, download=False, process=False)
-				return info_dict
+				return info_dict['id']
 			else:
-				info_dict = youtube_dl.YoutubeDL().extract_info("ytsearch:{}".format(info), download=False, process=False)
-				return info_dict
+				info_dict = youtube_dl.YoutubeDL().extract_info("gvsearch:{}".format(info), download=False, process=False)
+				return info_dict['id']
 		except:
-			print('Retrying...')
+			print('Retrying... ({})'.format(n))
 	return 'Failed'
 
 def conver(info):
 	ydl = youtube_dl.YoutubeDL(ydl_opts)
 	for n in range(1, 10):
 		try:
-		    if info.startswith('https://'):
-		    	info_dict = ydl.extract_info(info, download=True, process=True)
-		    	subprocess.run("ffmpeg -i {0}.webm -af \"firequalizer=gain_entry='entry(0,-23);entry(250,-11.5);entry(1000,0);entry(4000,8);entry(16000,16)\'\" -n -b:a 512000 -c:a libopus -loglevel quiet {0}.opus".format(info_dict['id']), shell=True)
-		    	data = json.loads(subprocess.run("ffprobe -print_format json -show_streams  -show_format {}.opus".format(info_dict['id']), stdout=subprocess.PIPE, shell=True).stdout)
-		    	info_dict['format'] = data['format']
-		    	info_dict['streams'] = data['streams']
-		    	q.add(info_dict)
-		    	return info_dict
-		    else:
-		    	info_dict = ydl.extract_info("ytsearch:{}".format(info), download=True, process=True)['entries'][0]
-		    	subprocess.run("ffmpeg -i {0}.webm -af \"firequalizer=gain_entry='entry(0,-23);entry(250,-11.5);entry(1000,0);entry(4000,8);entry(16000,16)\'\" -b:a 512000 -c:a libopus -n -loglevel quiet {0}.opus".format(info_dict['id']), shell=True)
-		    	data = json.loads(subprocess.run("ffprobe -print_format json -show_streams  -show_format {}.opus".format(info_dict['id']), stdout=subprocess.PIPE, shell=True).stdout)
-		    	info_dict['format'] = data['format']
-		    	info_dict['streams'] = data['streams']
-		    	q.add(info_dict)
-		    	return info_dict
+		    info_dict = ydl.extract_info(info, download=True, process=True)
+		    convert = subprocess.run("ffmpeg -i {0}.webm -af \"equalizer=f=440:width_type=o:width=2:g=5,equalizer=f=1000:width_type=h:width=200:g=-10\" -b:a 320000 -c:a libopus -n -loglevel quiet {0}.opus".format(info_dict['id']), shell=True)
+		    data = json.loads(subprocess.run("ffprobe -print_format json -show_streams  -show_format {}.opus".format(info_dict['id']), stdout=subprocess.PIPE, shell=True).stdout)
+		    info_dict['format'] = data['format']
+		    info_dict['streams'] = data['streams']
+		    q.add(info_dict)
+		    return info_dict
 		    break
 		except:
 			print('Retrying... ({})'.format(n))
-		return 'Failed'
+	return 'Failed'
 
 first = ['Not Converted']
 
@@ -301,10 +302,9 @@ async def on_ready():
 	print('Bot Started')
 	if len(first) == 1:
 		print('Loading queue...')
-		links = await create_queue(774525604116037662)
+		links = await create_queue(774525604116037662).split('\n')
 		for n in range(len(links)):
-		    link = links[n]
-		    conver(link)
+		    conver(link[n])
 		print('Loaded queue')
 		first.append('Converted')
 	voice = client.get_channel(vcch).guild.voice_client
