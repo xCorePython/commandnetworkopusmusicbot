@@ -117,6 +117,7 @@ class Queue:
 		self.np = 0
 		self.queue = []
 		self.voice = None
+		self.volume = 0.1
 
 	def add(self, value):
 		self.queue.append(value)
@@ -129,21 +130,22 @@ class Queue:
 	def start(self):
 		self.start = now_date('off', 9)
 		self.start2 = now_date('on', 9)
-		play(self.queue, self.voice)
+		self.play()
 	def set(self, value):
 		self.voice = value
 	def next(self):
 		if len(self.queue) == 1:
-			stop(self.voice)
+			self.stop()
 			self.start = now_date('off', 9)
 			self.start2 = now_date('on', 9)
-			play(self.queue, self.voice)
+			self.play()
 		self.played = self.queue[0]
 		self.queue = self.queue[1:]
 		self.queue.append(self.played)
+		self.stop()
 		self.start = now_date('off', 9)
 		self.start2 = now_date('on', 9)
-		play(self.queue, self.voice)
+		self.play()
 	def np1(self):
 		return self.queue
 	def np2(self):
@@ -152,28 +154,35 @@ class Queue:
 		return self.start2
 	def skip(self, value):
 		if len(self.queue) == 1:
-			stop(self.voice)
+			self.stop()
 			self.start = now_date('off', 9)
 			self.start2 = now_date('on', 9)
-			play(self.queue, self.voice)
+			self.play()
 		if value == 1:
 			self.played = self.queue[0]
 			self.queue = self.queue[1:]
 			self.queue.append(self.played)
-			stop(self.voice)
+			self.stop()
 			self.start = now_date('off', 9)
 			self.start2 = now_date('on', 9)
-			play(self.queue, self.voice)
+			self.play()
 		else:
 			for n in range(value):
 				self.played = self.queue[0]
 				self.queue = self.queue[1:]
 				self.queue.append(self.played)
-			stop(self.voice)
+			self.stop()
 			self.start = now_date('off', 9)
 			self.start2 = now_date('on', 9)
-			play(self.queue, self.voice)
-			
+			self.play()
+	def volume(self, value):
+		self.volume = value
+		self.voice.volume = value
+	def stop(self):
+		self.voice.stop()
+	def play(self):
+		self.voice.play(discord.PCMVolumeTransformer(discord.FFmpegOpusAudio('{0}.opus'.format(self.queue[0]['id']), bitrate=512), volume=self.volume))
+
 q = Queue()
 
 async def commands(command, message):
@@ -192,45 +201,52 @@ async def commands(command, message):
 		if nowpl > duration:
 			nowpl = duration
 		sendms.add_field(name='Time', value='{} / {}'.format(reverse(nowpl),reverse(info['duration'])),inline=False)
-		sendms.add_field(name='Codec', value='Opus(Ogg) / {}kbps(VBR) / {}Hz / {}'.format(str(int(info['format']['bit_rate'])/1000), info['streams'][0]['sample_rate'], info['streams'][0]['channel_layout']), inline=False)
+		sendms.add_field(name='Codec', value='Opus(Ogg) / {}kbps(VBR) / {}kHz / {}'.format(str(int(info['format']['bit_rate'])/1000), str(int(int(info['streams'][0]['sample_rate'])/1000)), info['streams'][0]['channel_layout']), inline=False)
 		sendms.set_thumbnail(url=str(info['thumbnails'][len(info['thumbnails']) - 1]['url']))
 		sendms.set_footer(text='Started at {}'.format(start2.split('.')[0]))
 		await message.channel.send(embed=sendms)
 	elif command == 'play':
-		await message.channel.send(':arrows_counterclockwise: Your request processing...')
+		await message.channel.send(':arrows_counterclockwise: **Your request processing...**')
 		info = conver(' '.join(arg))
 		if info == 'Failed':
-			await message.channel.send(':x: No result')
+			await message.channel.send(':x: **No result**')
 		else:
 			sendms = discord.Embed(title='Added')
 			link = 'https://youtu.be/' + info['id']
 			sendms.add_field(name='Title', value='[{}]({})'.format(info['title'], link), inline=False)
 			sendms.add_field(name='Uploader',value='[{}]({})'.format(info['uploader'],info['uploader_url']),inline=False)
-			sendms.add_field(name='Codec', value='Opus(Ogg) / {}kbps(VBR) / {}Hz / {}'.format(str(int(info['format']['bit_rate'])/1000), info[0]['sample_rate'], info['streams'][0]['channel_layout']), inline=False)
+			sendms.add_field(name='Codec', value='Opus(Ogg) / {}kbps(VBR) / {}Hz / {}'.format(str(int(info['format']['bit_rate'])/1000), info['streams'][0]['sample_rate'], info['streams'][0]['channel_layout']), inline=False)
 			sendms.set_thumbnail(url=str(info['thumbnails'][len(info['thumbnails']) - 1]['url']))
 			sendms.set_footer(text='Extracted from {}'.format(info['extractor']))
 			await message.channel.send(embed=sendms)
+	elif command == 'volume':
+		arg = message.content.split(' ')
+		if 0 < int(arg[1]) <= 100:
+			q.volume(int(value)/ 100)
+			await message.channel.send(':white_check_mark: **Successfully set volume {}%**'.format(arg[1]))
+		else:
+			await message.channel.send('**Please between 0-100**')
 	elif command == 'skip':
 		arg = message.content.split(' ')
 		if len(arg) == 1:
 			q.skip(1)
-			await message.channel.send(':fast_forward: Skipped')
+			await message.channel.send(':fast_forward: **Skipped**')
 		else:
 			if int(arg[1]) > 1000000:
-				await message.channel.send('Sorry. I can\'t skip over 1000000 songs. Please use 1-999999')
+				await message.channel.send('**Sorry. I can\'t skip over 1000000 songs. Please use 1-999999**')
 			if arg[1] == '1':
 				q.skip(1)
-				await message.channel.send(':fast_forward: Skipped')
+				await message.channel.send(':fast_forward: **Skipped**')
 			else:
 				q.skip(int(arg[1]))
-				await message.channel.send(':fast_forward: {} songs skipped'.format(arg[1]))
+				await message.channel.send(':fast_forward: **{} songs skipped**'.format(arg[1]))
 	elif command == 'remove':
 		arg = message.content.split(' ')
 		q.remove(int(arg[1]))
-		await message.channel.send(':white_check_mark: Removed')
+		await message.channel.send(':white_check_mark: **Removed**')
 	elif command == 'join':
 	    await client.get_channel(vcch).connect()
-	    await message.channel.send(':white_check_mark: Joined')
+	    await message.channel.send(':white_check_mark: **Joined**')
 	elif command == 'queue':
 		queue = q.np1()
 		queues = []
@@ -241,7 +257,7 @@ async def commands(command, message):
 		await message.channel.send(embed=sendms)
 	elif command == 'leave':
 		await client.get_channel(vcch).guild.voice_client.disconnect()
-		await message.channel.send('white_check_mark: Disconnected')
+		await message.channel.send('white_check_mark: **Disconnected**')
 
 async def create_queue(channelid):
 	messages = await client.get_channel(channelid).history(limit=1000).flatten()
@@ -250,11 +266,18 @@ async def create_queue(channelid):
 		urls.append(message.content)
 	return urls
 
-def stop(voice):
-	voice.stop()
-
-def play(queue, voice):
-    voice.play(discord.FFmpegOpusAudio('{0}.opus'.format(queue[0]['id']), bitrate=512))
+def search(url):
+	for n in range(1, 10):
+		try:
+			if url.startswith('https://'):
+				info_dict = youtube_dl.YoutubeDL().extract_info(info, download=False, process=False)
+				return info_dict
+			else:
+				info_dict = youtube_dl.YoutubeDL().extract_info("ytsearch:{}".format(info), download=False, process=False)
+				return info_dict
+		except:
+			print('Retrying...')
+	return 'Failed'
 
 def conver(info):
 	ydl = youtube_dl.YoutubeDL(ydl_opts)
@@ -262,7 +285,7 @@ def conver(info):
 		try:
 		    if info.startswith('https://'):
 		    	info_dict = ydl.extract_info(info, download=True, process=True)
-		    	subprocess.run("ffmpeg -i {0}.webm -b:a 512000 -c:a libopus -loglevel quiet {0}.opus".format(info_dict['id']), shell=True)
+		    	subprocess.run("ffmpeg -i {0}.webm -af \"firequalizer=gain_entry='entry(0,-23);entry(250,-11.5);entry(1000,0);entry(4000,8);entry(16000,16)\'\" -n -b:a 512000 -c:a libopus -loglevel quiet {0}.opus".format(info_dict['id']), shell=True)
 		    	data = json.loads(subprocess.run("ffprobe -print_format json -show_streams  -show_format {}.opus".format(info_dict['id']), stdout=subprocess.PIPE, shell=True).stdout)
 		    	info_dict['format'] = data['format']
 		    	info_dict['streams'] = data['streams']
@@ -270,7 +293,7 @@ def conver(info):
 		    	return info_dict
 		    else:
 		    	info_dict = ydl.extract_info("ytsearch:{}".format(info), download=True, process=True)['entries'][0]
-		    	subprocess.run("ffmpeg -i {0}.webm -b:a 512000 -c:a libopus -loglevel quiet {0}.opus".format(info_dict['id']), shell=True)
+		    	subprocess.run("ffmpeg -i {0}.webm -af \"firequalizer=gain_entry='entry(0,-23);entry(250,-11.5);entry(1000,0);entry(4000,8);entry(16000,16)\'\" -b:a 512000 -c:a libopus -n -loglevel quiet {0}.opus".format(info_dict['id']), shell=True)
 		    	data = json.loads(subprocess.run("ffprobe -print_format json -show_streams  -show_format {}.opus".format(info_dict['id']), stdout=subprocess.PIPE, shell=True).stdout)
 		    	info_dict['format'] = data['format']
 		    	info_dict['streams'] = data['streams']
