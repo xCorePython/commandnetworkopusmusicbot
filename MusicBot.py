@@ -5,7 +5,7 @@ sys_loop = 1
 command_prefix = 'c.'
 client = discord.Client()
 vcch = 734217960222228490
-vcch = 584262828807028746
+#vcch = 584262828807028746
 ydl_opts = {
     'format': 'bestaudio/best',
     'outtmpl': "%(id)s" + '.%(ext)s',
@@ -260,11 +260,9 @@ async def commands(command, message):
 		await message.channel.send('white_check_mark: **Disconnected**')
 
 async def create_queue(channelid):
-	messages = await client.get_channel(channelid).history(limit=1000).flatten()
-	urls = []
+	messages = await client.get_channel(channelid).history(limit=1).flatten()
 	for message in messages:
-		urls.append(message.content)
-	return urls
+		return message.content
 
 def search(url):
 	for n in range(1, 10):
@@ -302,7 +300,7 @@ async def on_ready():
 	print('Bot Started')
 	if len(first) == 1:
 		print('Loading queue...')
-		links = await create_queue(774525604116037662).split('\n')
+		links = str(await create_queue(774525604116037662)).split('\n')
 		for n in range(len(links)):
 		    conver(link[n])
 		print('Loaded queue')
