@@ -5,7 +5,7 @@ sys_loop = 1
 command_prefix = 'c.'
 client = discord.Client()
 vcch = 734217960222228490
-vcch = 584262828807028746
+#vcch = 584262828807028746
 ydl_opts = {
     'format': 'bestaudio/best',
     'outtmpl': "%(id)s" + '.%(ext)s',
@@ -212,7 +212,7 @@ async def commands(command, message):
 		await message.channel.send(embed=sendms)
 	elif command == 'play':
 		await message.channel.send(':arrows_counterclockwise: **Your request processing...**')
-		info = search(' '.join(arg))
+		info = conver(' '.join(arg))
 		if info == 'Failed':
 			await message.channel.send(':x: **No result**')
 		else:
@@ -271,7 +271,7 @@ def search(url):
 				info_dict = youtube_dl.YoutubeDL().extract_info(info, download=False, process=False)
 				conver('https://youtu.be/{}'.format(info_dict['id']))
 			else:
-				info_dict = youtube_dl.YoutubeDL().extract_info("gvsearch:{}".format(info), download=False, process=False)
+				info_dict = youtube_dl.YoutubeDL().extract_info("yt5search:{}".format(info), download=False, process=False)
 				conver('https://youtu.be/{}'.format(info_dict['entries'][0]['id']))
 		except:
 			print('Retrying... ({})'.format(n))
@@ -282,7 +282,7 @@ def conver(info):
 	for n in range(1, 10):
 		try:
 		    info_dict = ydl.extract_info(info, download=True, process=True)
-		    convert = subprocess.run("ffmpeg -i {0}.webm -af bass=g=3:f=175:w=0.6 -b:a 320000 -c:a libopus -n -loglevel quiet {0}.opus".format(info_dict['id']), shell=True)
+		    convert = subprocess.run("ffmpeg -i {0}.webm -af bass=g=10:f=175:w=1 -b:a 320000 -c:a libopus -n -loglevel quiet {0}.opus".format(info_dict['id']), shell=True)
 		    data = json.loads(subprocess.run("ffprobe -print_format json -show_streams  -show_format {}.opus".format(info_dict['id']), stdout=subprocess.PIPE, shell=True).stdout)
 		    info_dict['format'] = data['format']
 		    info_dict['streams'] = data['streams']
