@@ -12,7 +12,6 @@ ydl_opts = {
     'ignoreerrors': True,
     'noplaylist': True,
     'quiet': True,
-    'default_search': 'ytsearch1',
 }
 
 def now_month(mode):
@@ -261,13 +260,22 @@ def conver(info):
 	ydl = youtube_dl.YoutubeDL(ydl_opts)
 	for n in range(1, 10):
 		try:
-		    info_dict = ydl.extract_info(info, download=True, process=True)
-		    subprocess.run("ffmpeg -i {0}.webm -b:a 512000 -c:a libopus -loglevel quiet {0}.opus".format(info_dict['id']), shell=True)
-		    data = json.loads(subprocess.run("ffprobe -print_format json -show_streams  -show_format {}.opus".format(info_dict['id']), stdout=subprocess.PIPE, shell=True).stdout)
-		    info_dict['format'] = data['format']
-		    info_dict['streams'] = data['streams']
-		    q.add(info_dict)
-		    return info_dict
+		    if info.startswith('https://'):
+		    	info_dict = ydl.extract_info(info, download=True, process=True)
+		    	subprocess.run("ffmpeg -i {0}.webm -b:a 512000 -c:a libopus -loglevel quiet {0}.opus".format(info_dict['id']), shell=True)
+		    	data = json.loads(subprocess.run("ffprobe -print_format json -show_streams  -show_format {}.opus".format(info_dict['id']), stdout=subprocess.PIPE, shell=True).stdout)
+		    	info_dict['format'] = data['format']
+		    	info_dict['streams'] = data['streams']
+		    	q.add(info_dict)
+		    	return info_dict
+		    else:
+		    	info_dict = ydl.extract_info("ytsearch:{}".format(info), download=True, process=True)['entries'][0]
+		    	subprocess.run("ffmpeg -i {0}.webm -b:a 512000 -c:a libopus -loglevel quiet {0}.opus".format(info_dict['id']), shell=True)
+		    	data = json.loads(subprocess.run("ffprobe -print_format json -show_streams  -show_format {}.opus".format(info_dict['id']), stdout=subprocess.PIPE, shell=True).stdout)
+		    	info_dict['format'] = data['format']
+		    	info_dict['streams'] = data['streams']
+		    	q.add(info_dict)
+		    	return info_dict
 		    break
 		except:
 		    return 'Failed'
