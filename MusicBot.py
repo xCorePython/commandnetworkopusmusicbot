@@ -307,6 +307,7 @@ async def on_ready():
 		    conver(link)
 		print('Loaded queue')
 		first.append('Converted')
+	voice = client.get_channel(vcch).guild.voice_client
 	if not voice.is_connected():
 		await client.get_channel.connect()
 	voice = client.get_channel(vcch).guild.voice_client
