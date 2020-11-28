@@ -309,7 +309,7 @@ async def on_ready():
 		first.append('Converted')
 	voice = client.get_channel(vcch).guild.voice_client
 	if not voice:
-		await client.get_channel.connect()
+		await client.get_channel(vcch).connect()
 	voice = client.get_channel(vcch).guild.voice_client
 	q.set(voice)
 	q.start()
