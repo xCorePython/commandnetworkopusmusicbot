@@ -193,7 +193,7 @@ async def commands(command, message):
 		if nowpl > duration:
 			nowpl = duration
 		sendms.add_field(name='Time', value='{} / {}'.format(reverse(nowpl),reverse(info['duration'])),inline=False)
-		sendms.add_field(name='Codec', value='Opus(Ogg) / {}kbps(VBR) / {}Hz / {}'.format(str(int(info['format']['bit_rate'])/1000), info[0]['sample_rate'], info['streams'][0]['channel_layout']), inline=False)
+		sendms.add_field(name='Codec', value='Opus(Ogg) / {}kbps(VBR) / {}Hz / {}'.format(str(int(info['format']['bit_rate'])/1000), info['streams'][0]['sample_rate'], info['streams'][0]['channel_layout']), inline=False)
 		sendms.set_thumbnail(url=str(info['thumbnails'][len(info['thumbnails']) - 1]['url']))
 		sendms.set_footer(text='Started at {}'.format(start2.split('.')[0]))
 		await message.channel.send(embed=sendms)
