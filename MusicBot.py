@@ -185,7 +185,7 @@ q = Queue()
 async def save():
     messages = await client.get_channel(774525604116037662).history(limit=1).flatten()
     queues = []
-    for n in range(len(q.np1)):
+    for n in range(len(q.np1())):
     	queues.append('https://youtu.be/{}'.format(queue[n]['id']))
     for message in messages:
     	await message.edit(content='\n'.join(queues))
@@ -212,7 +212,7 @@ async def commands(command, message):
 		await message.channel.send(embed=sendms)
 	elif command == 'play':
 		await message.channel.send(':arrows_counterclockwise: **Your request processing...**')
-		info = conver(' '.join(arg))
+		info = search(' '.join(arg))
 		if info == 'Failed':
 			await message.channel.send(':x: **No result**')
 		else:
@@ -269,10 +269,10 @@ def search(url):
 		try:
 			if url.startswith('https://'):
 				info_dict = youtube_dl.YoutubeDL().extract_info(info, download=False, process=False)
-				return info_dict['id']
+				conver('https://youtu.be/{}'.format(info_dict['id']))
 			else:
 				info_dict = youtube_dl.YoutubeDL().extract_info("gvsearch:{}".format(info), download=False, process=False)
-				return info_dict['id']
+				conver('https://youtu.be/{}'.format(info_dict['entries'][0]['id']))
 		except:
 			print('Retrying... ({})'.format(n))
 	return 'Failed'
@@ -282,7 +282,7 @@ def conver(info):
 	for n in range(1, 10):
 		try:
 		    info_dict = ydl.extract_info(info, download=True, process=True)
-		    convert = subprocess.run("ffmpeg -i {0}.webm -af \"equalizer=f=440:width_type=o:width=2:g=5,equalizer=f=1000:width_type=h:width=200:g=-10\" -b:a 320000 -c:a libopus -n -loglevel quiet {0}.opus".format(info_dict['id']), shell=True)
+		    convert = subprocess.run("ffmpeg -i {0}.webm -af bass=g=3:f=175:w=0.6 -b:a 320000 -c:a libopus -n -loglevel quiet {0}.opus".format(info_dict['id']), shell=True)
 		    data = json.loads(subprocess.run("ffprobe -print_format json -show_streams  -show_format {}.opus".format(info_dict['id']), stdout=subprocess.PIPE, shell=True).stdout)
 		    info_dict['format'] = data['format']
 		    info_dict['streams'] = data['streams']
