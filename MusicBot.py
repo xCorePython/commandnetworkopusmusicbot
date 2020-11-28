@@ -197,16 +197,16 @@ async def commands(command, message):
 		sendms.set_footer(text='Started at {}'.format(start2.split('.')[0]))
 		await message.channel.send(embed=sendms)
 	elif command == 'play':
-		await message.channel.send(':arrows_counterclockwise: Your request processing...')
+		await message.channel.send(':arrows_counterclockwise: **Your request processing...**')
 		info = conver(' '.join(arg))
 		if info == 'Failed':
-			await message.channel.send(':x: No result')
+			await message.channel.send(':x: **No result**')
 		else:
 			sendms = discord.Embed(title='Added')
 			link = 'https://youtu.be/' + info['id']
 			sendms.add_field(name='Title', value='[{}]({})'.format(info['title'], link), inline=False)
 			sendms.add_field(name='Uploader',value='[{}]({})'.format(info['uploader'],info['uploader_url']),inline=False)
-			sendms.add_field(name='Codec', value='Opus(Ogg) / {}kbps(VBR) / {}Hz / {}'.format(str(int(info['format']['bit_rate'])/1000), info[0]['sample_rate'], info['streams'][0]['channel_layout']), inline=False)
+			sendms.add_field(name='Codec', value='Opus(Ogg) / {}kbps(VBR) / {}Hz / {}'.format(str(int(info['format']['bit_rate'])/1000), info['streams'][0]['sample_rate'], info['streams'][0]['channel_layout']), inline=False)
 			sendms.set_thumbnail(url=str(info['thumbnails'][len(info['thumbnails']) - 1]['url']))
 			sendms.set_footer(text='Extracted from {}'.format(info['extractor']))
 			await message.channel.send(embed=sendms)
@@ -214,23 +214,23 @@ async def commands(command, message):
 		arg = message.content.split(' ')
 		if len(arg) == 1:
 			q.skip(1)
-			await message.channel.send(':fast_forward: Skipped')
+			await message.channel.send(':fast_forward: **Skipped**')
 		else:
 			if int(arg[1]) > 1000000:
-				await message.channel.send('Sorry. I can\'t skip over 1000000 songs. Please use 1-999999')
+				await message.channel.send(':x: **Sorry. I can\'t skip over 1000000 songs. Please use 1-999999**')
 			if arg[1] == '1':
 				q.skip(1)
-				await message.channel.send(':fast_forward: Skipped')
+				await message.channel.send(':fast_forward: **Skipped**')
 			else:
 				q.skip(int(arg[1]))
-				await message.channel.send(':fast_forward: {} songs skipped'.format(arg[1]))
+				await message.channel.send(':fast_forward: **{} songs skipped**'.format(arg[1]))
 	elif command == 'remove':
 		arg = message.content.split(' ')
 		q.remove(int(arg[1]))
-		await message.channel.send(':white_check_mark: Removed')
+		await message.channel.send(':white_check_mark: **Removed**')
 	elif command == 'join':
 	    await client.get_channel(vcch).connect()
-	    await message.channel.send(':white_check_mark: Joined')
+	    await message.channel.send(':white_check_mark: **Joined**')
 	elif command == 'queue':
 		queue = q.np1()
 		queues = []
@@ -241,7 +241,7 @@ async def commands(command, message):
 		await message.channel.send(embed=sendms)
 	elif command == 'leave':
 		await client.get_channel(vcch).guild.voice_client.disconnect()
-		await message.channel.send('white_check_mark: Disconnected')
+		await message.channel.send(':white_check_mark: **Disconnected**')
 
 async def create_queue(channelid):
 	messages = await client.get_channel(channelid).history(limit=1000).flatten()
