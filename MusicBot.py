@@ -1,4 +1,4 @@
-import discord, youtube_dl, subprocess, calendar, datetime, os, asyncio
+import discord, youtube_dl, subprocess, calendar, datetime, asyncio, json
 
 sys_token = 'NzYxOTI5NDgxNDIxOTc5NjY5.X3hwIA.ItlW0Q2Fej-OyNdbfUKO2czZQvk'
 sys_loop = 1
@@ -12,6 +12,7 @@ ydl_opts = {
     'ignoreerrors': True,
     'noplaylist': True,
     'quiet': True,
+    'default_search': 'ytsearch1',
 }
 
 def now_month(mode):
@@ -118,7 +119,6 @@ class Queue:
 		self.queue = []
 		self.voice = None
 	def add(self, value):
-		value['bitrate'] = int(str(subprocess.run("ffprobe -print_format json -show_format {}.opus".format(value['id']), stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, text=True).stdout).split('"bit_rate": "')[1].split('"')[0])
 		self.queue.append(value)
 	def remove(self, value):
 		try:
@@ -132,7 +132,9 @@ class Queue:
 		play(self.queue, self.voice)
 	def set(self, value):
 		self.voice = value
-	def next(self):
+	def next(self, error=None):
+		if error:
+			return
 		if len(self.queue) == 1:
 			self.start = now_date('off', 9)
 			self.start2 = now_date('on', 9)
@@ -191,7 +193,7 @@ async def commands(command, message):
 		if nowpl > duration:
 			nowpl = duration
 		sendms.add_field(name='Time', value='{} / {}'.format(reverse(nowpl),reverse(info['duration'])),inline=False)
-		sendms.add_field(name='Codec', value='Opus / {}kbps (VBR)'.format(str(int(info['bitrate'])/1000)), inline=False)
+		sendms.add_field(name='Codec', value='Opus(Ogg) / {}kbps(VBR) / {}Hz / {}'.format(str(int(info['format']['bit_rate'])/1000), info[0]['sample_rate'], info['streams'][0]['channel_layout']), inline=False)
 		sendms.set_thumbnail(url=str(info['thumbnails'][len(info['thumbnails']) - 1]['url']))
 		sendms.set_footer(text='Started at {}'.format(start2.split('.')[0]))
 		await message.channel.send(embed=sendms)
@@ -205,7 +207,7 @@ async def commands(command, message):
 			link = 'https://youtu.be/' + info['id']
 			sendms.add_field(name='Title', value='[{}]({})'.format(info['title'], link), inline=False)
 			sendms.add_field(name='Uploader',value='[{}]({})'.format(info['uploader'],info['uploader_url']),inline=False)
-			sendms.add_field(name='Codec', value='Opus / {}kbps (VBR)'.format(str(int(info['bitrate'])/1000)), inline=False)
+			sendms.add_field(name='Codec', value='Opus(Ogg) / {}kbps(VBR) / {}Hz / {}'.format(str(int(info['format']['bit_rate'])/1000), info[0]['sample_rate'], info['streams'][0]['channel_layout']), inline=False)
 			sendms.set_thumbnail(url=str(info['thumbnails'][len(info['thumbnails']) - 1]['url']))
 			sendms.set_footer(text='Extracted from {}'.format(info['extractor']))
 			await message.channel.send(embed=sendms)
@@ -215,6 +217,8 @@ async def commands(command, message):
 			q.skip(1)
 			await message.channel.send(':fast_forward: Skipped')
 		else:
+			if int(arg[1]) > 1000000:
+				await message.channel.send('Sorry. I can\'t skip over 1000000 songs. Please use 1-999999')
 			if arg[1] == '1':
 				q.skip(1)
 				await message.channel.send(':fast_forward: Skipped')
@@ -251,22 +255,19 @@ def stop(voice):
 	voice.stop()
 
 def play(queue, voice):
-    voice.play(discord.FFmpegOpusAudio('{0}.opus'.format(queue[0]['id']), bitrate=320))
+    voice.play(discord.FFmpegOpusAudio('{0}.opus'.format(queue[0]['id']), bitrate=512), after=q.next())
 
 def conver(info):
 	ydl = youtube_dl.YoutubeDL(ydl_opts)
 	for n in range(1, 10):
 		try:
-		    if info.startswith('https://'):
-		        info_dict = ydl.extract_info(info, download=True, process=True)
-		        os.system("ffmpeg -i {0}.webm -b:a 320000 -loglevel quiet -c:a libopus {0}.opus".format(info_dict['id']))
-		        q.add(info_dict)
-		        return info_dict
-		    else:
-		        info_dict = ydl.extract_info("ytsearch:{}".format(info), download=True, process=True)
-		        os.system("ffmpeg -i {0}.webm -b:a 320000 -loglevel quiet -c:a libopus {0}.opus".format(info_dict['entries'][0]['id']))
-		        q.add(info_dict['entries'][0])
-		        return info_dict['entries'][0]
+		    info_dict = ydl.extract_info(info, download=True, process=True)
+		    subprocess.run("ffmpeg -i {0}.webm -b:a 512000 -c:a libopus -loglevel quiet {0}.opus".format(info_dict['id']), shell=True)
+		    data = json.loads(subprocess.run("ffprobe -print_format json -show_streams  -show_format {}.opus".format(info_dict['id']), stdout=subprocess.PIPE, shell=True).stdout)
+		    info_dict['format'] = data['format']
+		    info_dict['streams'] = data['streams']
+		    q.add(info_dict)
+		    return info_dict
 		    break
 		except:
 		    return 'Failed'
@@ -288,10 +289,6 @@ async def on_ready():
 	voice = client.get_channel(vcch).guild.voice_client
 	q.set(voice)
 	q.start()
-	while sys_loop == 1:
-		if not voice.is_playing():
-			q.next()
-		await asyncio.sleep(0.1)
 
 @client.event
 async def on_message(message):
