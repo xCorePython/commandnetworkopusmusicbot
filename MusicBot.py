@@ -255,7 +255,7 @@ def stop(voice):
 	voice.stop()
 
 def play(queue, voice):
-    voice.play(discord.FFmpegOpusAudio('{0}.opus'.format(queue[0]['id']), bitrate=512), after=q.next())
+    voice.play(discord.FFmpegOpusAudio('{0}.opus'.format(queue[0]['id']), bitrate=512))
 
 def conver(info):
 	ydl = youtube_dl.YoutubeDL(ydl_opts)
@@ -289,6 +289,10 @@ async def on_ready():
 	voice = client.get_channel(vcch).guild.voice_client
 	q.set(voice)
 	q.start()
+	while sys_loop == 1:
+		if not voice.is_playing():
+			q.next()
+		await asyncio.sleep(0.1)
 
 @client.event
 async def on_message(message):
