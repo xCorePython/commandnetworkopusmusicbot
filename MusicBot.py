@@ -12,6 +12,11 @@ ydl_opts = {
     'ignoreerrors': True,
     'noplaylist': True,
     'quiet': True,
+	'postprocessors': [{
+    	'key': 'FFmpegExtractAudio',
+        'preferredcodec': 'libopus',
+        'preferredquality': '512'},
+    {'key': 'FFmpegMetadata'},],
 }
 
 def now_month(mode):
@@ -212,19 +217,20 @@ async def commands(command, message):
 		await message.channel.send(embed=sendms)
 	elif command == 'play':
 		await message.channel.send(':arrows_counterclockwise: **Your request processing...**')
-		info = conver(' '.join(arg))
+		info = search(' '.join(arg))
 		if info == 'Failed':
 			await message.channel.send(':x: **No result**')
 		else:
-			sendms = discord.Embed(title='Added')
+			sendms = discord.Embed(title='Downloading...')
 			link = 'https://youtu.be/' + info['id']
 			sendms.add_field(name='Title', value='[{}]({})'.format(info['title'], link), inline=False)
 			sendms.add_field(name='Uploader',value='[{}]({})'.format(info['uploader'],info['uploader_url']),inline=False)
-			sendms.add_field(name='Codec', value='Opus(Ogg) / {}kbps(VBR) / {}Hz / {}'.format(str(int(info['format']['bit_rate'])/1000), info['streams'][0]['sample_rate'], info['streams'][0]['channel_layout']), inline=False)
+			sendms.add_field(name='Duration', value=reverse(info['duration']))
 			sendms.set_thumbnail(url=str(info['thumbnails'][len(info['thumbnails']) - 1]['url']))
 			sendms.set_footer(text='Extracted from {}'.format(info['extractor']))
 			await message.channel.send(embed=sendms)
 			await save()
+			conver('https://youtu.be/{}'.format(info['id']))
 	elif command == 'skip':
 		arg = message.content.split(' ')
 		if len(arg) == 1:
@@ -269,10 +275,10 @@ def search(url):
 		try:
 			if url.startswith('https://'):
 				info_dict = youtube_dl.YoutubeDL().extract_info(info, download=False, process=False)
-				conver('https://youtu.be/{}'.format(info_dict['id']))
+				return info_dict
 			else:
-				info_dict = youtube_dl.YoutubeDL().extract_info("yt5search:{}".format(info), download=False, process=False)
-				conver('https://youtu.be/{}'.format(info_dict['entries'][0]['id']))
+				info_dict = youtube_dl.YoutubeDL().extract_info("ytsearch:{}".format(info), download=False, process=False)
+				return info_dict['entries'][0]
 		except:
 			print('Retrying... ({})'.format(n))
 	return 'Failed'
@@ -282,7 +288,7 @@ def conver(info):
 	for n in range(1, 10):
 		try:
 		    info_dict = ydl.extract_info(info, download=True, process=True)
-		    convert = subprocess.run("ffmpeg -i {0}.webm -af bass=g=10:f=175:w=1 -b:a 320000 -c:a libopus -n -loglevel quiet {0}.opus".format(info_dict['id']), shell=True)
+		    #convert = subprocess.run("ffmpeg -i {0}.webm -af bass=g=1:f=200:w=10 -b:a 320000 -c:a libmp3lame -n -loglevel quiet {0}.mp3".format(info_dict['id']), shell=True)
 		    data = json.loads(subprocess.run("ffprobe -print_format json -show_streams  -show_format {}.opus".format(info_dict['id']), stdout=subprocess.PIPE, shell=True).stdout)
 		    info_dict['format'] = data['format']
 		    info_dict['streams'] = data['streams']
