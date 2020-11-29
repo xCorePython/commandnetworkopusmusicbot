@@ -185,7 +185,7 @@ def stop(voice):
 	voice.stop()
 
 def play(queue, voice):
-	voice.play(discord.FFmpegPCMAudio('{0}.mp3'.format(self.queue[0]['id'])))
+	voice.play(discord.FFmpegPCMAudio('{0}.mp3'.format(queue[0]['id'])))
 
 q = Queue()
 
