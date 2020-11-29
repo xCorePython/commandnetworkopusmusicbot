@@ -12,11 +12,11 @@ ydl_opts = {
     'ignoreerrors': True,
     'noplaylist': True,
     'quiet': True,
-	'postprocessors': [{
-    	'key': 'FFmpegExtractAudio',
-        'preferredcodec': 'opus',
-        'preferredquality': '512'},
-    {'key': 'FFmpegMetadata'},],
+#	'postprocessors': [{
+#    	'key': 'FFmpegExtractAudio',
+#        'preferredcodec': 'mp3',
+#        'preferredquality': '320'},
+#    {'key': 'FFmpegMetadata'},],
 }
 
 def now_month(mode):
@@ -183,7 +183,7 @@ class Queue:
 	def stop(self):
 		self.voice.stop()
 	def play(self):
-		self.voice.play(discord.FFmpegOpusAudio('{0}.opus'.format(self.queue[0]['id']), bitrate=320))
+		self.voice.play(discord.FFmpegPCMAudio('{0}.opus'.format(self.queue[0]['id'])))
 
 q = Queue()
 
@@ -288,7 +288,7 @@ def conver(info):
 	for n in range(1, 10):
 		try:
 		    info_dict = ydl.extract_info(info, download=True, process=True)
-		    #convert = subprocess.run("ffmpeg -i {0}.webm -af bass=g=1:f=200:w=10 -b:a 320000 -c:a libmp3lame -n -loglevel quiet {0}.mp3".format(info_dict['id']), shell=True)
+		    convert = subprocess.run("ffmpeg -i {0}.webm -af bass=g=1:f=200:w=10 -b:a 320000 -c:a libmp3lame -n -loglevel quiet {0}.mp3".format(info_dict['id']), shell=True)
 		    data = json.loads(subprocess.run("ffprobe -print_format json -show_streams  -show_format {}.opus".format(info_dict['id']), stdout=subprocess.PIPE, shell=True).stdout)
 		    info_dict['format'] = data['format']
 		    info_dict['streams'] = data['streams']
