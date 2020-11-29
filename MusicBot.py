@@ -193,7 +193,7 @@ async def save():
     messages = await client.get_channel(774525604116037662).history(limit=1).flatten()
     queues = []
     for n in range(len(q.np1())):
-    	queues.append('https://youtu.be/{}'.format(q.np()[n]['id']))
+    	queues.append('https://youtu.be/{}'.format(q.np1()[n]['id']))
     for message in messages:
     	await message.edit(content='\n'.join(queues))
 
@@ -311,8 +311,6 @@ first = ['Not Converted']
 
 @client.event
 async def on_ready():
-	q.add([{'id': 'GJI4Gv7NbmE'}])
-	await save()
 	print('Bot Started')
 	if len(first) == 1:
 		print('Loading queue...')
