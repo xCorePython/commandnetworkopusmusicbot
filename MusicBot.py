@@ -304,7 +304,7 @@ def conv(info_dict):
 	dllink = str(str(soup).split('href=')[8])[1:].split('" rel')[0]
 	urllib.request.urlretrieve(dllink, title)
 
-def conver(info):
+def conver(info_dict):
 	for n in range(1, 3):
 		try:
 			#ffmpeg -y -i original.mp3 -af "firequalizer=gain_entry='entry(0,-23);entry(250,-11.5);entry(1000,0);entry(4000,8);entry(16000,16)'" test1.mp3
