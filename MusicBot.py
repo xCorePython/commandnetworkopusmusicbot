@@ -287,10 +287,10 @@ def search(value):
 	for n in range(1, 3):
 		try:
 			if value.startswith('https://'):
-				info_dict = youtube_dl.YoutubeDL().extract_info(value, download=True, process=True)
+				info_dict = youtube_dl.YoutubeDL(ydl_opts).extract_info(value, download=True, process=True)
 				return info_dict
 			else:
-				info_dict = youtube_dl.YoutubeDL().extract_info("ytsearch:{}".format(value), download=True, process=True)
+				info_dict = youtube_dl.YoutubeDL(ydl_opts).extract_info("ytsearch:{}".format(value), download=True, process=True)
 				return info_dict['entries'][0]
 		except:
 			print('Retrying... ({})'.format(n))
