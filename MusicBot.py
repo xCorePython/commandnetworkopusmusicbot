@@ -288,8 +288,8 @@ def conver(info):
 	for n in range(1, 10):
 		try:
 		    info_dict = ydl.extract_info(info, download=True, process=True)
-		    convert = subprocess.run("ffmpeg -i {0}.webm -af bass=g=1:f=200:w=10 -b:a 320000 -c:a libmp3lame -n -loglevel quiet {0}.mp3".format(info_dict['id']), shell=True)
-		    data = json.loads(subprocess.run("ffprobe -print_format json -show_streams  -show_format {}.opus".format(info_dict['id']), stdout=subprocess.PIPE, shell=True).stdout)
+		    convert = subprocess.run("ffmpeg -i {0}.webm -af bass=g=1:f=200:w=10 -b:a 320000 -c:a libmp3lame -n {0}.mp3".format(info_dict['id']), shell=True)
+		    data = json.loads(subprocess.run("ffprobe -print_format json -show_streams  -show_format {}.mp3".format(info_dict['id']), stdout=subprocess.PIPE, shell=True).stdout)
 		    info_dict['format'] = data['format']
 		    info_dict['streams'] = data['streams']
 		    q.add(info_dict)
