@@ -135,57 +135,60 @@ class Queue:
 	def start(self):
 		self.start = now_date('off', 9)
 		self.start2 = now_date('on', 9)
-		play(self.queue, self.voice)
+		self.play()
 	def set(self, value):
 		self.voice = value
 	def next(self):
 		if len(self.queue) == 1:
-			stop(self.voice)
+			self.stop()
 			self.start = now_date('off', 9)
 			self.start2 = now_date('on', 9)
-			play(self.queue, self.voice)
+			self.play()
 		self.played = self.queue[0]
 		self.queue = self.queue[1:]
 		self.queue.append(self.played)
-		stop(self.voice)
+		self.stop()
 		self.start = now_date('off', 9)
 		self.start2 = now_date('on', 9)
-		play(self.queue, self.voice)
+		self.play()
 	def np1(self):
 		return self.queue
 	def np2(self):
 	    return self.start
 	def np3(self):
 		return self.start2
+	def nvol(self):
+		return self.volume
 	def skip(self, value):
 		if len(self.queue) == 1:
-			stop(self.voice)
+			self.stop()
 			self.start = now_date('off', 9)
 			self.start2 = now_date('on', 9)
-			play(self.queue, self.voice)
+			self.play()
 		if value == 1:
 			self.played = self.queue[0]
 			self.queue = self.queue[1:]
 			self.queue.append(self.played)
-			stop(self.voice)
+			self.stop()
 			self.start = now_date('off', 9)
 			self.start2 = now_date('on', 9)
-			play(self.queue, self.voice)
+			self.play()
 		else:
 			for n in range(value):
 				self.played = self.queue[0]
 				self.queue = self.queue[1:]
 				self.queue.append(self.played)
-			stop(self.voice)
+			self.stop()
 			self.start = now_date('off', 9)
 			self.start2 = now_date('on', 9)
-			play(self.queue, self.voice)
-
-def stop(voice):
-	voice.stop()
-
-def play(queue, voice):
-	voice.play(discord.FFmpegPCMAudio('{0}.mp3'.format(queue[0]['id'])))
+			self.play()
+	def stop(self):
+		self.voice.stop()
+	def volume(self, value):
+		self.volume = value
+		self.voice.volume = value
+	def play(self):
+		self.voice.play(discord.PCMVolumeTrabsformer(discord.FFmpegPCMAudio('{0}.mp3'.format(self.queue[0]['id']))), volume=self.volume)
 
 q = Queue()
 
@@ -213,7 +216,9 @@ async def commands(command, message):
 		if nowpl > duration:
 			nowpl = duration
 		sendms.add_field(name='Time', value='{} / {}'.format(reverse(nowpl),reverse(info['duration'])),inline=False)
-		sendms.add_field(name='Codec', value='mp3 / {}kbps(CBR) / {}kHz / {}'.format(str(int(info['format']['bit_rate'])/1000), str(int(int(info['streams'][0]['sample_rate'])/1000)), info['streams'][0]['channel_layout']), inline=False)
+		sendms.add_field(name='Codec', value=info['streams'][0]['codec_long_name'], inline=False)
+		sendms.add_field(name='Bitrate', value='{}kbps / {}kHz / {}'.format(str(int(info['format']['bit_rate'])/1000), str(int(int(info['streams'][0]['sample_rate'])/1000)), info['streams'][0]['channel_layout']), inline=False)
+		sendms.add_field(name='Volume', value='{}%'.format(q.nvol()), inline=False)
 		sendms.set_thumbnail(url=str(info['thumbnails'][len(info['thumbnails']) - 1]['url']))
 		sendms.set_footer(text='Started at {}'.format(start2.split('.')[0]))
 		await message.channel.send(embed=sendms)
@@ -223,7 +228,7 @@ async def commands(command, message):
 		if info == 'Failed':
 			await message.channel.send(':x: **No result**')
 		else:
-			sendms = discord.Embed(title='Downloading...')
+			sendms = discord.Embed(title='Converting...')
 			link = 'https://youtu.be/' + info['id']
 			sendms.add_field(name='Title', value='[{}]({})'.format(info['title'], link), inline=False)
 			sendms.add_field(name='Uploader',value='[{}]({})'.format(info['uploader'],info['uploader_url']),inline=False)
@@ -251,10 +256,16 @@ async def commands(command, message):
 		arg = message.content.split(' ')
 		q.remove(int(arg[1]))
 		await message.channel.send(':white_check_mark: **Removed**')
-		await save(l)
+		await save()
 	elif command == 'join':
 	    await client.get_channel(vcch).connect()
 	    await message.channel.send(':white_check_mark: **Joined**')
+	elif command == 'volume':
+		if 0 <= int(arg[1]) <= 100:
+			q.volume(int(int(arg[1])/100))
+			await message.channel.send(':white_check_mark: **Successfully changed volume {}%'.format(arg[1]))
+		else:
+			await message.channel.send(':x: Please input 0-100')
 	elif command == 'queue':
 		queue = q.np1()
 		queues = []
@@ -265,7 +276,7 @@ async def commands(command, message):
 		await message.channel.send(embed=sendms)
 	elif command == 'leave':
 		await client.get_channel(vcch).guild.voice_client.disconnect()
-		await message.channel.send('white_check_mark: **Disconnected**')
+		await message.channel.send(':white_check_mark: **Disconnected**')
 
 async def create_queue(channelid):
 	messages = await client.get_channel(channelid).history(limit=1).flatten()
@@ -273,13 +284,13 @@ async def create_queue(channelid):
 		return message.content
 
 def search(value):
-	for n in range(1, 10):
+	for n in range(1, 3):
 		try:
 			if value.startswith('https://'):
-				info_dict = youtube_dl.YoutubeDL().extract_info(value, download=False, process=False)
+				info_dict = youtube_dl.YoutubeDL().extract_info(value, download=True, process=True)
 				return info_dict
 			else:
-				info_dict = youtube_dl.YoutubeDL().extract_info("ytsearch:{}".format(value), download=False, process=False)
+				info_dict = youtube_dl.YoutubeDL().extract_info("ytsearch:{}".format(value), download=True, process=True)
 				return info_dict['entries'][0]
 		except:
 			print('Retrying... ({})'.format(n))
@@ -294,12 +305,10 @@ def conv(info_dict):
 	urllib.request.urlretrieve(dllink, title)
 
 def conver(info):
-	for n in range(1, 10):
+	for n in range(1, 3):
 		try:
-			ydl = youtube_dl.YoutubeDL(ydl_opts)
-			info_dict = ydl.extract_info(info, download=True, process=True)
 			#ffmpeg -y -i original.mp3 -af "firequalizer=gain_entry='entry(0,-23);entry(250,-11.5);entry(1000,0);entry(4000,8);entry(16000,16)'" test1.mp3
-			convert = subprocess.run("ffmpeg -i {0}.webm -af \"firequalizer=gain_entry=\'entry(0,10);entry(100,7);entry(250,2);entry(7000,0);entry(9000,4);entry(16000,10)\'\" -vbr ob -b:a 320000 -c:a libmp3lame -n {0}.mp3".format(info_dict['id']), shell=True)
+			convert = subprocess.run("ffmpeg -i {0}.webm -af \"firequalizer=gain_entry=\'entry(0,5);entry(100,5);entry(250,2);entry(7000,0);entry(9000,1.5);entry(16000,6)\'\" -vbr ob -b:a 320000 -c:a libmp3lame -n {0}.mp3".format(info_dict['id']), shell=True)
 			data = json.loads(subprocess.run("ffprobe -print_format json -show_streams  -show_format {}.mp3".format(info_dict['id']), stdout=subprocess.PIPE, shell=True).stdout)
 			info_dict['format'] = data['format']
 			info_dict['streams'] = data['streams']
@@ -331,6 +340,7 @@ async def on_ready():
 	while sys_loop == 1:
 		if not voice.is_playing():
 			q.next()
+			q.set(client.get_channel(vcch).guild.voice_client)
 		await asyncio.sleep(0.1)
 
 @client.event
