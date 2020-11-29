@@ -14,7 +14,7 @@ ydl_opts = {
     'quiet': True,
 	'postprocessors': [{
     	'key': 'FFmpegExtractAudio',
-        'preferredcodec': 'libopus',
+        'preferredcodec': 'opus',
         'preferredquality': '512'},
     {'key': 'FFmpegMetadata'},],
 }
