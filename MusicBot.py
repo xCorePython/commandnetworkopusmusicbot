@@ -328,7 +328,8 @@ async def on_ready():
 		print('Loading queue...')
 		links = str(await create_queue(774525604116037662)).split('\n')
 		for n in range(len(links)):
-		    conver(links[n])
+		    info = search(links[n])
+		    conver('https://youtu.be/{}'.format(info['id']))
 		print('Loaded queue')
 		first.append('Converted')
 	voice = client.get_channel(vcch).guild.voice_client
