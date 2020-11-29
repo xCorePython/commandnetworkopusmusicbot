@@ -135,22 +135,22 @@ class Queue:
 	def start(self):
 		self.start = now_date('off', 9)
 		self.start2 = now_date('on', 9)
-		self.play()
+		play(self.queue, self.voice)
 	def set(self, value):
 		self.voice = value
 	def next(self):
 		if len(self.queue) == 1:
-			self.stop()
+			stop(self.voice)
 			self.start = now_date('off', 9)
 			self.start2 = now_date('on', 9)
-			self.play()
+			play(self.queue, self.voice)
 		self.played = self.queue[0]
 		self.queue = self.queue[1:]
 		self.queue.append(self.played)
-		self.stop()
+		stop(self.voice)
 		self.start = now_date('off', 9)
 		self.start2 = now_date('on', 9)
-		self.play()
+		play(self.queue, self.voice)
 	def np1(self):
 		return self.queue
 	def np2(self):
@@ -159,31 +159,33 @@ class Queue:
 		return self.start2
 	def skip(self, value):
 		if len(self.queue) == 1:
-			self.stop()
+			stop(self.voice)
 			self.start = now_date('off', 9)
 			self.start2 = now_date('on', 9)
-			self.play()
+			play(self.queue, self.voice)
 		if value == 1:
 			self.played = self.queue[0]
 			self.queue = self.queue[1:]
 			self.queue.append(self.played)
-			self.stop()
+			stop(self.voice)
 			self.start = now_date('off', 9)
 			self.start2 = now_date('on', 9)
-			self.play()
+			play(self.queue, self.voice)
 		else:
 			for n in range(value):
 				self.played = self.queue[0]
 				self.queue = self.queue[1:]
 				self.queue.append(self.played)
-			self.stop()
+			stop(self.voice)
 			self.start = now_date('off', 9)
 			self.start2 = now_date('on', 9)
-			self.play()
-	def stop(self):
-		self.voice.stop()
-	def play(self):
-		self.voice.play(discord.FFmpegPCMAudio('{0}.mp3'.format(self.queue[0]['id'])))
+			play(self.queue, self.voice)
+
+def stop(voice):
+	voice.stop()
+
+def play(queue, voice):
+	voice.play(discord.FFmpegPCMAudio('{0}.mp3'.format(self.queue[0]['id'])))
 
 q = Queue()
 
@@ -191,7 +193,7 @@ async def save():
     messages = await client.get_channel(774525604116037662).history(limit=1).flatten()
     queues = []
     for n in range(len(q.np1())):
-    	queues.append('https://youtu.be/{}'.format(q.np1()[n]['id']))
+    	queues.append('https://youtu.be/{}'.format(q.np()[n]['id']))
     for message in messages:
     	await message.edit(content='\n'.join(queues))
 
@@ -309,6 +311,8 @@ first = ['Not Converted']
 
 @client.event
 async def on_ready():
+	q.add([{'id': 'GJI4Gv7NbmE'}])
+	await save()
 	print('Bot Started')
 	if len(first) == 1:
 		print('Loading queue...')
@@ -319,7 +323,7 @@ async def on_ready():
 		first.append('Converted')
 	voice = client.get_channel(vcch).guild.voice_client
 	if not voice:
-		await client.get_channel(vcch).connect(reconnect=20)
+		await client.get_channel(vcch).connect()
 	voice = client.get_channel(vcch).guild.voice_client
 	q.set(voice)
 	q.start()
