@@ -1,4 +1,4 @@
-import discord, youtube_dl, subprocess, calendar, datetime, asyncio, json
+ import discord, youtube_dl, subprocess, calendar, datetime, asyncio, json
 
 sys_token = 'NzYxOTI5NDgxNDIxOTc5NjY5.X3hwIA.ItlW0Q2Fej-OyNdbfUKO2czZQvk'
 sys_loop = 1
@@ -183,7 +183,7 @@ class Queue:
 	def stop(self):
 		self.voice.stop()
 	def play(self):
-		self.voice.play(discord.FFmpegPCMAudio('{0}.opus'.format(self.queue[0]['id'])))
+		self.voice.play(discord.FFmpegPCMAudio('{0}.mp3'.format(self.queue[0]['id'])))
 
 q = Queue()
 
@@ -313,7 +313,7 @@ async def on_ready():
 		first.append('Converted')
 	voice = client.get_channel(vcch).guild.voice_client
 	if not voice:
-		await client.get_channel(vcch).connect()
+		await client.get_channel(vcch).connect(reconnect=20)
 	voice = client.get_channel(vcch).guild.voice_client
 	q.set(voice)
 	q.start()
