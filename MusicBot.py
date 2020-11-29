@@ -1,4 +1,4 @@
-import discord, youtube_dl, subprocess, calendar, datetime, asyncio, json
+ import discord, youtube_dl, subprocess, calendar, datetime, asyncio, json
 
 sys_token = 'NzYxOTI5NDgxNDIxOTc5NjY5.X3hwIA.ItlW0Q2Fej-OyNdbfUKO2czZQvk'
 sys_loop = 1
@@ -211,7 +211,7 @@ async def commands(command, message):
 		if nowpl > duration:
 			nowpl = duration
 		sendms.add_field(name='Time', value='{} / {}'.format(reverse(nowpl),reverse(info['duration'])),inline=False)
-		sendms.add_field(name='Codec', value='Opus(Ogg) / {}kbps(VBR) / {}kHz / {}'.format(str(int(info['format']['bit_rate'])/1000), str(int(int(info['streams'][0]['sample_rate'])/1000)), info['streams'][0]['channel_layout']), inline=False)
+		sendms.add_field(name='Codec', value='mp3 / {}kbps(CBR) / {}kHz / {}'.format(str(int(info['format']['bit_rate'])/1000), str(int(int(info['streams'][0]['sample_rate'])/1000)), info['streams'][0]['channel_layout']), inline=False)
 		sendms.set_thumbnail(url=str(info['thumbnails'][len(info['thumbnails']) - 1]['url']))
 		sendms.set_footer(text='Started at {}'.format(start2.split('.')[0]))
 		await message.channel.send(embed=sendms)
@@ -287,8 +287,14 @@ def conver(info):
 	ydl = youtube_dl.YoutubeDL(ydl_opts)
 	for n in range(1, 10):
 		try:
-		    info_dict = ydl.extract_info(info, download=True, process=True)
-		    convert = subprocess.run("ffmpeg -i {0}.webm -af bass=g=1:f=200:w=10 -b:a 320000 -c:a libmp3lame -n {0}.mp3".format(info_dict['id']), shell=True)
+			info_dict = youtube_dl.YoutubeDL().extract_info(info, download=False, process=False)
+			title = info_dict['id'] + '.mp3'
+			url = 'https://www.320youtube.com/watch?v={}'.format(info_dict['id'])
+			result = requests.get(url)
+			soup = bs4.BeautifulSoup(result.text, 'html.parser')
+			dllink = str(str(soup).split('href=')[8])[1:].split('" rel')[0]
+			urllib.request.urlretrieve(dllink, title)
+		    #convert = subprocess.run("ffmpeg -i {0}.webm -af bass=g=1:f=200:w=10 -b:a 320000 -c:a libmp3lame -n {0}.mp3".format(info_dict['id']), shell=True)
 		    data = json.loads(subprocess.run("ffprobe -print_format json -show_streams  -show_format {}.mp3".format(info_dict['id']), stdout=subprocess.PIPE, shell=True).stdout)
 		    info_dict['format'] = data['format']
 		    info_dict['streams'] = data['streams']
