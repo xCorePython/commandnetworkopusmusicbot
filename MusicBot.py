@@ -186,10 +186,9 @@ class Queue:
 		self.voice.stop()
 	def volume(self, value):
 		self.volume = value
-		self.np.volume = value
+		self.voice.volume = value
 	def play(self):
-		source = self.voice.play(discord.FFmpegPCMAudio('{0}.mp3'.format(self.queue[0]['id'])))
-		self.np = discord.PCMVolumeTransformer(source, volume=self.volume)
+		self.voice.play(discord.FFmpegPCMAudio('{0}.mp3'.format(self.queue[0]['id'])))
 
 q = Queue()
 
@@ -218,7 +217,7 @@ async def commands(command, message):
 			nowpl = duration
 		sendms.add_field(name='Time', value='{} / {}'.format(reverse(nowpl),reverse(info['duration'])),inline=False)
 		sendms.add_field(name='Codec', value=info['streams'][0]['codec_long_name'], inline=False)
-		sendms.add_field(name='Bitrate', value='{}kbps(VBR) / {}kHz / {}'.format(str(int(info['format']['bit_rate'])/1000), str(int(int(info['streams'][0]['sample_rate'])/1000)), info['streams'][0]['channel_layout']), inline=False)
+		sendms.add_field(name='Bitrate', value='{}kbps / {}kHz / {}'.format(str(int(info['format']['bit_rate'])/1000), str(int(int(info['streams'][0]['sample_rate'])/1000)), info['streams'][0]['channel_layout']), inline=False)
 		sendms.add_field(name='Volume', value='{}%'.format(q.nvol()), inline=False)
 		sendms.set_thumbnail(url=str(info['thumbnails'][len(info['thumbnails']) - 1]['url']))
 		sendms.set_footer(text='Started at {}'.format(start2.split('.')[0]))
@@ -309,7 +308,7 @@ def conver(info_dict):
 	for n in range(1, 3):
 		try:
 			#ffmpeg -y -i original.mp3 -af "firequalizer=gain_entry='entry(0,-23);entry(250,-11.5);entry(1000,0);entry(4000,8);entry(16000,16)'" test1.mp3
-			convert = subprocess.run("ffmpeg -i {0}.webm -af \"firequalizer=gain_entry=\'entry(0,5);entry(100,5);entry(250,2);entry(7000,0);entry(9000,1.5);entry(16000,6)\'\" -vbr on -b:a 320000 -c:a libmp3lame -n {0}.mp3".format(info_dict['id']), shell=True)
+			convert = subprocess.run("ffmpeg -i {0}.webm -af \"firequalizer=gain_entry=\'entry(0,5);entry(100,5);entry(250,2);entry(7000,0);entry(9000,1.5);entry(16000,6)\'\" -vbr on -vn -b:a 320000 -c:a libmp3lame -n {0}.mp3".format(info_dict['id']), shell=True)
 			data = json.loads(subprocess.run("ffprobe -print_format json -show_streams  -show_format {}.mp3".format(info_dict['id']), stdout=subprocess.PIPE, shell=True).stdout)
 			info_dict['format'] = data['format']
 			info_dict['streams'] = data['streams']
@@ -333,16 +332,16 @@ async def on_ready():
 		    conver(info)
 		print('Loaded queue')
 		first.append('Converted')
-	voice = client.get_channel(vcch).guild.voice_client
-	if not voice:
-		await client.get_channel(vcch).connect()
-	voice = client.get_channel(vcch).guild.voice_client
-	q.set(voice)
+	if not client.get_channel(vcch).guild.voice_client:
+		voice = await client.get_channel(vcch).connect()
+		voice.source = discord.PCMVolumeTransformer(voice.source, volume=q.nvol())
+	q.set(client.get_channel(vcch).guild.voice_client)
 	q.start()
 	while sys_loop == 1:
 		if not voice.is_playing():
-			q.next()
-			q.set(client.get_channel(vcch).guild.voice_client)
+			if client.get_channel(vcch).guild.voice_client:
+				q.next()
+		q.set(client.get_channel(vcch).guild.voice_client)
 		await asyncio.sleep(0.1)
 
 @client.event
