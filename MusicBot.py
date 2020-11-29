@@ -186,9 +186,9 @@ class Queue:
 		self.voice.stop()
 	def volume(self, value):
 		self.volume = value
-		self.voice.volume = value
+		self.np.volume = value
 	def play(self):
-		self.voice.play(discord.PCMVolumeTransformer(discord.FFmpegPCMAudio('{0}.mp3'.format(self.queue[0]['id']))), volume=self.volume)
+		self.np = discord.PCMVolumeTransformer(self.voice.play(discord.FFmpegPCMAudio('{0}.mp3'.format(self.queue[0]['id']))), volume=self.volume)
 
 q = Queue()
 
