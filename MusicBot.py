@@ -272,31 +272,34 @@ async def create_queue(channelid):
 	for message in messages:
 		return message.content
 
-def search(url):
+def search(value):
 	for n in range(1, 10):
 		try:
-			if url.startswith('https://'):
-				info_dict = youtube_dl.YoutubeDL().extract_info(info, download=False, process=False)
+			if value.startswith('https://'):
+				info_dict = youtube_dl.YoutubeDL().extract_info(value, download=False, process=False)
 				return info_dict
 			else:
-				info_dict = youtube_dl.YoutubeDL().extract_info("ytsearch:{}".format(info), download=False, process=False)
+				info_dict = youtube_dl.YoutubeDL().extract_info("ytsearch:{}".format(value), download=False, process=False)
 				return info_dict['entries'][0]
 		except:
 			print('Retrying... ({})'.format(n))
 	return 'Failed'
 
+def conv(info_dict):
+	title = info_dict['id'] + '.mp3'
+	url = 'https://www.320youtube.com/watch?v={}'.format(info_dict['id'])
+	result = requests.get(url)
+	soup = bs4.BeautifulSoup(result.text, 'html.parser')
+	dllink = str(str(soup).split('href=')[8])[1:].split('" rel')[0]
+	urllib.request.urlretrieve(dllink, title)
+
 def conver(info):
 	for n in range(1, 10):
 		try:
 			ydl = youtube_dl.YoutubeDL(ydl_opts)
-			info_dict = youtube_dl.YoutubeDL().extract_info(info, download=False, process=False)
-			title = info_dict['id'] + '.mp3'
-			url = 'https://www.320youtube.com/watch?v={}'.format(info_dict['id'])
-			result = requests.get(url)
-			soup = bs4.BeautifulSoup(result.text, 'html.parser')
-			dllink = str(str(soup).split('href=')[8])[1:].split('" rel')[0]
-			urllib.request.urlretrieve(dllink, title)
-		    #convert = subprocess.run("ffmpeg -i {0}.webm -af bass=g=1:f=200:w=10 -b:a 320000 -c:a libmp3lame -n {0}.mp3".format(info_dict['id']), shell=True)
+			info_dict = youtube_dl.YoutubeDL().extract_info(info, download=True, process=True)
+			#ffmpeg -y -i original.mp3 -af "firequalizer=gain_entry='entry(0,-23);entry(250,-11.5);entry(1000,0);entry(4000,8);entry(16000,16)'" test1.mp3
+		    convert = subprocess.run("ffmpeg -i {0}.webm -af \"firequalizer=gain_entry=\'entry(0,20);entry(100,15);entry(250,0);entry(8000,0);entry(16000,20)\'\" -V 0 -c:a libmp3lame -n {0}.mp3".format(info_dict['id']), shell=True)
 			data = json.loads(subprocess.run("ffprobe -print_format json -show_streams  -show_format {}.mp3".format(info_dict['id']), stdout=subprocess.PIPE, shell=True).stdout)
 			info_dict['format'] = data['format']
 			info_dict['streams'] = data['streams']
