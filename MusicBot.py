@@ -299,7 +299,7 @@ def conver(info):
 			ydl = youtube_dl.YoutubeDL(ydl_opts)
 			info_dict = ydl.extract_info(info, download=True, process=True)
 			#ffmpeg -y -i original.mp3 -af "firequalizer=gain_entry='entry(0,-23);entry(250,-11.5);entry(1000,0);entry(4000,8);entry(16000,16)'" test1.mp3
-			convert = subprocess.run("ffmpeg -i {0}.webm -af \"firequalizer=gain_entry=\'entry(0,5);entry(100,3);entry(250,0.5);entry(7000,0);entry(9000,3)entry(16000,7)\'\" -vbr ob -b:a 320000 -c:a libmp3lame -n {0}.mp3".format(info_dict['id']), shell=True)
+			convert = subprocess.run("ffmpeg -i {0}.webm -af \"firequalizer=gain_entry=\'entry(0,10);entry(100,7);entry(250,2);entry(7000,0);entry(9000,4);entry(16000,10)\'\" -vbr ob -b:a 320000 -c:a libmp3lame -n {0}.mp3".format(info_dict['id']), shell=True)
 			data = json.loads(subprocess.run("ffprobe -print_format json -show_streams  -show_format {}.mp3".format(info_dict['id']), stdout=subprocess.PIPE, shell=True).stdout)
 			info_dict['format'] = data['format']
 			info_dict['streams'] = data['streams']
