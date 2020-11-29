@@ -1,3 +1,5 @@
 discord
 youtube_dl
 PyNaCl
+bs4
+requests
