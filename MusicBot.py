@@ -284,9 +284,9 @@ def search(url):
 	return 'Failed'
 
 def conver(info):
-	ydl = youtube_dl.YoutubeDL(ydl_opts)
 	for n in range(1, 10):
 		try:
+			ydl = youtube_dl.YoutubeDL(ydl_opts)
 			info_dict = youtube_dl.YoutubeDL().extract_info(info, download=False, process=False)
 			title = info_dict['id'] + '.mp3'
 			url = 'https://www.320youtube.com/watch?v={}'.format(info_dict['id'])
