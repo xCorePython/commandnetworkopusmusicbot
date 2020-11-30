@@ -186,7 +186,6 @@ class Queue:
 		self.voice.stop()
 	def volume(self, value):
 		self.volume = float(value)
-		self.voice.volume = float(value)
 	def play(self):
 		self.voice.play(discord.PCMVolumeTransformer(discord.FFmpegPCMAudio('{0}.mp3'.format(self.queue[0]['id'])), volume=self.volume))
 
@@ -218,7 +217,7 @@ async def commands(command, message):
 		sendms.add_field(name='Time', value='{} / {}'.format(reverse(nowpl),reverse(info['duration'])),inline=False)
 		sendms.add_field(name='Codec', value=info['streams'][0]['codec_long_name'], inline=False)
 		sendms.add_field(name='Bitrate', value='{}kbps / {}'.format(str(int(info['format']['bit_rate'])/1000),  info['streams'][0]['channel_layout']), inline=False)
-		sendms.add_field(name='Volume', value='{}%'.format(str(int(q.nvol())*100)), inline=False)
+		sendms.add_field(name='Volume', value='{}%'.format(str(float(q.nvol())*100)), inline=False)
 		sendms.set_thumbnail(url=str(info['thumbnails'][len(info['thumbnails']) - 1]['url']))
 		sendms.set_footer(text='Started at {}'.format(start2.split('.')[0]))
 		await message.channel.send(embed=sendms)
@@ -262,7 +261,8 @@ async def commands(command, message):
 	    await message.channel.send(':white_check_mark: **Joined**')
 	elif command == 'volume':
 		if 0 <= int(arg[0]) <= 100:
-			q.volume(str(int(arg[0])/100))
+			client.get_channel(vcch).guild.voice_client.volume = float(arg[0]/100)
+			q.volume(float(arg[1])/100)
 			await message.channel.send(':white_check_mark: **Successfully changed volume {}%'.format(arg[1]))
 		else:
 			await message.channel.send(':x: Please input 0-100')
