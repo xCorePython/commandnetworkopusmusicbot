@@ -185,8 +185,6 @@ class Queue:
 	def stop(self):
 		self.voice.stop()
 	def volume(self, value):
-		self.voice.source = discord.PCMVolumeTransformer(self.voice.source)
-		self.voice.source.volume = value
 		self.volume = value
 	def play(self):
 		self.voice.play(discord.PCMVolumeTransformer(discord.FFmpegPCMAudio('{0}.mp3'.format(self.queue[0]['id'])), volume=self.volume))
@@ -264,8 +262,7 @@ async def commands(command, message):
 	    await message.channel.send(':white_check_mark: **Joined**')
 	elif command == 'volume':
 		if 0 <= int(arg[0]) <= 100:
-			value = float(int(arg[0])/100)
-			q.volume(value)
+			client.get_channel(vcch).guild.voice_client.source.volume = float(int(arg[0])/100)
 			await message.channel.send(':white_check_mark: **Successfully changed volume {}%'.format(arg[0]))
 		else:
 			await message.channel.send(':x: Please input between 0-100')
@@ -305,6 +302,15 @@ def search(value):
 			print('Retrying... ({})'.format(n))
 	return 'Failed'
 
+async def np():
+	while sys_loop == 1:
+		data = q.np1()
+		start = q.np2()
+		nptime = reverse(now_date('off', 9) - float(start))
+		duration = reverse(data['duration'])
+		await client.get_channel(782863961153339403).edit(topic='Time : {} / {}\nTitle : {}\nUploader : {}\nCodec : {}\nBitrate : {}kbps / {}'.format(str(nptime), str(duration), data['title'], data['uploader'], data['streams'][0]['codec_long_name'], str(int(data['format']['bit_rate'])/1000), data['streams'][0]['channel_layout']))
+		await asyncio.sleep(4)
+
 def conv(info_dict):
 	title = info_dict['id'] + '.mp3'
 	url = 'https://www.320youtube.com/watch?v={}'.format(info_dict['id'])
@@ -340,8 +346,9 @@ async def on_ready():
 		first.append('Converted')
 	if not client.get_channel(vcch).guild.voice_client:
 		await client.get_channel(vcch).connect()
+		q.start()
 	q.set(client.get_channel(vcch).guild.voice_client)
-	q.start()
+	await client.get_channel(773053692629876757).send('[endless-play] started')
 	while sys_loop == 1:
 		if client.get_channel(vcch).guild.voice_client:
 			if not client.get_channel(vcch).guild.voice_client.is_playing():
@@ -353,6 +360,9 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
+	if message.channel.id == 773053692629876757:
+		if message.content == '[endless-play] started':
+			await np()
 	if message.content.startswith(command_prefix):
 		prefix = message.content[len(command_prefix):]
 		start = prefix.split(' ')[0]
