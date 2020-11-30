@@ -7,7 +7,7 @@ sys_loop = 1
 command_prefix = 'c.'
 client = discord.Client()
 vcch = 734217960222228490
-#vcch = 584262828807028746
+vcch = 584262828807028746
 ydl_opts = {
     'format': 'bestaudio/best',
     'outtmpl': "%(id)s" + '.%(ext)s',
@@ -339,6 +339,7 @@ first = ['Not Converted']
 
 @client.event
 async def on_ready():
+	await client.get_channel(vcch).connect(reconnect=10, timeout=120)
 	print('Bot Started')
 	if len(first) == 1:
 		print('Loading queue...')
@@ -348,17 +349,14 @@ async def on_ready():
 		    conver(info)
 		print('Loaded queue')
 		first.append('Converted')
-		
-	await client.get_channel(vcch).connect()
+		q.set(client.get_channel(vcch).guild.voice_client)
+		q.start()
 	q.set(client.get_channel(vcch).guild.voice_client)
-	q.start()
 	await client.get_channel(773053692629876757).send('[endless-play] started')
 	while sys_loop == 1:
 		if client.get_channel(vcch).guild.voice_client:
 			if not client.get_channel(vcch).guild.voice_client.is_playing():
 				q.next()
-		else:
-			await client.get_channel(vcch).connect()
 		q.set(client.get_channel(vcch).guild.voice_client)
 		await asyncio.sleep(0.1)
 
