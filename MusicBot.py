@@ -236,8 +236,8 @@ async def commands(command, message):
 			sendms.set_thumbnail(url=str(info['thumbnails'][len(info['thumbnails']) - 1]['url']))
 			sendms.set_footer(text='Extracted from {}'.format(info['extractor']))
 			await message.channel.send(embed=sendms)
-			await save()
 			conver(info)
+			await save()
 	elif command == 'skip':
 		arg = message.content.split(' ')
 		if len(arg) == 1:
@@ -262,7 +262,7 @@ async def commands(command, message):
 	    await message.channel.send(':white_check_mark: **Joined**')
 	elif command == 'volume':
 		if 0 <= int(arg[1]) <= 100:
-			q.volume(int(int(arg[1])/100))
+			q.volume(int(arg[1])/100)
 			await message.channel.send(':white_check_mark: **Successfully changed volume {}%'.format(arg[1]))
 		else:
 			await message.channel.send(':x: Please input 0-100')
@@ -307,7 +307,7 @@ def conv(info_dict):
 def conver(info_dict):
 	try:
 			#ffmpeg -y -i original.mp3 -af "firequalizer=gain_entry='entry(0,-23);entry(250,-11.5);entry(1000,0);entry(4000,8);entry(16000,16)'" test1.mp3
-		convert = subprocess.run("ffmpeg -i {0}.webm -af \"firequalizer=gain_entry=\'entry(0,3.5);entry(100,1.5);entry(250,0.5);entry(7000,0);entry(9000,1.5);entry(16000,6);entry(30000,6)\'\" -vbr on -vn -b:a 320000 -c:a libmp3lame -n {0}.mp3".format(info_dict['id']), shell=True)
+		convert = subprocess.run("ffmpeg -i {0}.webm -af \"firequalizer=gain_entry=\'entry(0,4);entry(100,2);entry(250,0.5);entry(7000,0);entry(9000,1.5);entry(16000,7);entry(40000,7)\'\" -vbr on -vn -b:a 320000 -c:a libmp3lame -n {0}.mp3".format(info_dict['id']), shell=True)
 		data = json.loads(subprocess.run("ffprobe -print_format json -show_streams  -show_format {}.mp3".format(info_dict['id']), stdout=subprocess.PIPE, shell=True).stdout)
 		info_dict['format'] = data['format']
 		info_dict['streams'] = data['streams']
