@@ -5,7 +5,7 @@ sys_loop = 1
 command_prefix = 'c.'
 client = discord.Client()
 vcch = 734217960222228490
-vcch = 584262828807028746
+#vcch = 584262828807028746
 ydl_opts = {
     'format': 'bestaudio/best',
     'outtmpl': "%(id)s" + '.%(ext)s',
@@ -441,4 +441,4 @@ async def on_message(message):
 			await commands('queue', message)
 			return
 
-client.run(sys_token)
+client.run(sys_token3)
