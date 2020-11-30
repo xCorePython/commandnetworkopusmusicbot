@@ -188,7 +188,7 @@ class Queue:
 		self.volume = value
 		self.voice.volume = value
 	def play(self):
-		self.voice.play(discord.FFmpegPCMAudio('{0}.mp3'.format(self.queue[0]['id'])))
+		self.voice.play(discord.PCMVolumeTransformer(discord.FFmpegPCMAudio('{0}.mp3'.format(self.queue[0]['id'])), volume=self.volume))
 
 q = Queue()
 
@@ -333,8 +333,7 @@ async def on_ready():
 		print('Loaded queue')
 		first.append('Converted')
 	if not client.get_channel(vcch).guild.voice_client:
-		voice = await client.get_channel(vcch).connect()
-		voice.source = discord.PCMVolumeTransformer(voice.source, volume=q.nvol())
+		await client.get_channel(vcch).connect()
 	q.set(client.get_channel(vcch).guild.voice_client)
 	q.start()
 	while sys_loop == 1:
