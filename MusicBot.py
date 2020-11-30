@@ -5,7 +5,7 @@ sys_loop = 1
 command_prefix = 'c.'
 client = discord.Client()
 vcch = 734217960222228490
-#vcch = 584262828807028746
+vcch = 584262828807028746
 ydl_opts = {
     'format': 'bestaudio/best',
     'outtmpl': "%(id)s" + '.%(ext)s',
@@ -346,8 +346,7 @@ async def on_ready():
 		    conver(info)
 		print('Loaded queue')
 		first.append('Converted')
-	if not client.get_channel(vcch).guild.voice_client:
-		await client.get_channel(vcch).connect()
+		await client.get_channel(vcch).connect(reconnect=10)
 		q.set(client.get_channel(vcch).guild.voice_client)
 		q.start()
 		await client.get_channel(773053692629876757).send('[endless-play] started')
