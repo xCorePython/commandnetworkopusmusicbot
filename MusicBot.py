@@ -185,8 +185,8 @@ class Queue:
 	def stop(self):
 		self.voice.stop()
 	def volume(self, value):
-		self.volume = value
-		self.voice.volume = value
+		self.volume = float(value)
+		self.voice.volume = float(value)
 	def play(self):
 		self.voice.play(discord.PCMVolumeTransformer(discord.FFmpegPCMAudio('{0}.mp3'.format(self.queue[0]['id'])), volume=self.volume))
 
@@ -244,11 +244,11 @@ async def commands(command, message):
 			q.skip(1)
 			await message.channel.send(':fast_forward: **Skipped**')
 		else:
-			if int(arg[1]) > 1000000:
-				await message.channel.send('**Sorry. I can\'t skip over 1000000 songs. Please use 1-999999**')
 			if arg[1] == '1':
 				q.skip(1)
 				await message.channel.send(':fast_forward: **Skipped**')
+			if int(arg[1]) > 1000000:
+				await message.channel.send('**Sorry. I can\'t skip over 1000000 songs. Please use 1-999999**')
 			else:
 				q.skip(int(arg[1]))
 				await message.channel.send(':fast_forward: **{} songs skipped**'.format(arg[1]))
@@ -261,8 +261,8 @@ async def commands(command, message):
 	    await client.get_channel(vcch).connect()
 	    await message.channel.send(':white_check_mark: **Joined**')
 	elif command == 'volume':
-		if 0 <= int(arg[1]) <= 100:
-			q.volume(int(arg[1])/100)
+		if 0 <= int(arg[0]) <= 100:
+			q.volume(str(int(arg[0])/100))
 			await message.channel.send(':white_check_mark: **Successfully changed volume {}%'.format(arg[1]))
 		else:
 			await message.channel.send(':x: Please input 0-100')
@@ -288,10 +288,16 @@ def search(value):
 		try:
 			if value.startswith('https://'):
 				info_dict = youtube_dl.YoutubeDL(ydl_opts).extract_info(value, download=True, process=True)
-				return info_dict
+				if info_dict:
+					return info_dict
+				else:
+					error = raiseerror
 			else:
 				info_dict = youtube_dl.YoutubeDL(ydl_opts).extract_info("ytsearch:{}".format(value), download=True, process=True)
-				return info_dict['entries'][0]
+				if info_dict:
+					return info_dict['entries'][0]
+				else:
+					error = raiseerror
 		except:
 			print('Retrying... ({})'.format(n))
 	return 'Failed'
@@ -307,7 +313,7 @@ def conv(info_dict):
 def conver(info_dict):
 	try:
 			#ffmpeg -y -i original.mp3 -af "firequalizer=gain_entry='entry(0,-23);entry(250,-11.5);entry(1000,0);entry(4000,8);entry(16000,16)'" test1.mp3
-		convert = subprocess.run("ffmpeg -i {0}.webm -af \"firequalizer=gain_entry=\'entry(0,4);entry(100,2);entry(250,0.5);entry(7000,0);entry(9000,1.5);entry(16000,7);entry(40000,7)\'\" -vbr on -vn -b:a 320000 -c:a libmp3lame -n {0}.mp3".format(info_dict['id']), shell=True)
+		convert = subprocess.run("ffmpeg -i {0}.webm -af \"firequalizer=gain_entry=\'entry(0,4);entry(100,2);entry(250,0.5);entry(7000,0);entry(9000,1.5);entry(16000,7);entry(40000,7)\'\" -vn -b:a 320000 -c:a libmp3lame -n {0}.mp3".format(info_dict['id']), shell=True)
 		data = json.loads(subprocess.run("ffprobe -print_format json -show_streams  -show_format {}.mp3".format(info_dict['id']), stdout=subprocess.PIPE, shell=True).stdout)
 		info_dict['format'] = data['format']
 		info_dict['streams'] = data['streams']
@@ -334,9 +340,11 @@ async def on_ready():
 	q.set(client.get_channel(vcch).guild.voice_client)
 	q.start()
 	while sys_loop == 1:
-		if not client.get_channel(vcch).guild.voice_client.is_playing():
-			if client.get_channel(vcch).guild.voice_client:
+		if client.get_channel(vcch).guild.voice_client:
+			if not client.get_channel(vcch).guild.voice_client.is_playing():
 				q.next()
+		else:
+			await client.get_channel(vcch).connect()
 		q.set(client.get_channel(vcch).guild.voice_client)
 		await asyncio.sleep(0.1)
 
