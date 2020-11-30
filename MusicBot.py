@@ -223,7 +223,7 @@ async def commands(command, message):
 		sendms.set_footer(text='Started at {}'.format(start2.split('.')[0]))
 		await message.channel.send(embed=sendms)
 	elif command == 'play':
-		await message.channel.send(':arrows_counterclockwise: **Your request processing...**')
+		await message.channel.send(':arrows_counterclockwise: **Searching...**')
 		info = search(' '.join(arg))
 		if info == 'Failed':
 			await message.channel.send(':x: **No result**')
@@ -263,9 +263,9 @@ async def commands(command, message):
 	elif command == 'volume':
 		if 0 <= int(arg[0]) <= 100:
 			client.get_channel(vcch).guild.voice_client.source.volume = float(int(arg[0])/100)
-			await message.channel.send(':white_check_mark: **Successfully changed volume {}%'.format(arg[0]))
+			await message.channel.send(':white_check_mark: **Successfully changed volume {}%**'.format(arg[0]))
 		else:
-			await message.channel.send(':x: Please input between 0-100')
+			await message.channel.send(':x: **Please input between 0-100**')
 	elif command == 'queue':
 		queue = q.np1()
 		queues = []
@@ -306,9 +306,11 @@ async def np():
 	while sys_loop == 1:
 		data = q.np1()
 		start = q.np2()
-		nptime = reverse(now_date('off', 9) - float(start))
-		duration = reverse(data['duration'])
-		await client.get_channel(782863961153339403).edit(topic='Time : {} / {}\nTitle : {}\nUploader : {}\nCodec : {}\nBitrate : {}kbps / {}'.format(str(nptime), str(duration), data['title'], data['uploader'], data['streams'][0]['codec_long_name'], str(int(data['format']['bit_rate'])/1000), data['streams'][0]['channel_layout']))
+		nptime = float(now_date('off', 9) - float(start))
+		duration = float(data['format']['duration'])
+		if nptime > duration:
+			nptime = duration
+		await client.get_channel(782863961153339403).edit(topic='Time : {} / {}\nTitle : {}\nUploader : {}\nCodec : {}\nBitrate : {}kbps / {}'.format(str(reverse(nptime)), str(reverse(duration)), data['title'], data['uploader'], data['streams'][0]['codec_long_name'], str(int(data['format']['bit_rate'])/1000), data['streams'][0]['channel_layout']))
 		await asyncio.sleep(4)
 
 def conv(info_dict):
