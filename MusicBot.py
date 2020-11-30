@@ -186,8 +186,8 @@ class Queue:
 		self.voice.stop()
 	def volume(self, value):
 		self.voice.source = discord.PCMVolumeTransformer(self.voice.source)
-		self.voice.source.volume = float(int(value)/100)
-		self.volume = float(int(value)/100)
+		self.voice.source.volume = value
+		self.volume = value
 	def play(self):
 		self.voice.play(discord.PCMVolumeTransformer(discord.FFmpegPCMAudio('{0}.mp3'.format(self.queue[0]['id'])), volume=self.volume))
 		
@@ -264,7 +264,8 @@ async def commands(command, message):
 	    await message.channel.send(':white_check_mark: **Joined**')
 	elif command == 'volume':
 		if 0 <= int(arg[0]) <= 100:
-			q.volume(arg[0])
+			value = float(int(value)/100)
+			q.volume(value)
 			await message.channel.send(':white_check_mark: **Successfully changed volume {}%'.format(arg[0]))
 		else:
 			await message.channel.send(':x: Please input between 0-100')
@@ -315,7 +316,7 @@ def conv(info_dict):
 def conver(info_dict):
 	try:
 			#ffmpeg -y -i original.mp3 -af "firequalizer=gain_entry='entry(0,-23);entry(250,-11.5);entry(1000,0);entry(4000,8);entry(16000,16)'" test1.mp3
-		convert = subprocess.run("ffmpeg -i {0}.webm -af \"firequalizer=gain_entry=\'entry(0,4);entry(100,2);entry(250,0.5);entry(7000,0);entry(9000,1.5);entry(16000,7);entry(40000,7)\'\" -vn -b:a 320000 -c:a libmp3lame -n {0}.mp3".format(info_dict['id']), shell=True)
+		convert = subprocess.run("ffmpeg -i {0}.webm -af \"firequalizer=gain_entry=\'entry(0,4);entry(100,0.5);entry(250,0);entry(7000,0);entry(9000,1.5);entry(16000,9);entry(40000,9)\'\" -vn -b:a 320000 -c:a libmp3lame -n {0}.mp3".format(info_dict['id']), shell=True)
 		data = json.loads(subprocess.run("ffprobe -print_format json -show_streams  -show_format {}.mp3".format(info_dict['id']), stdout=subprocess.PIPE, shell=True).stdout)
 		info_dict['format'] = data['format']
 		info_dict['streams'] = data['streams']
