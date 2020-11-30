@@ -1,4 +1,4 @@
-import discord, youtube_dl, subprocess, calendar, datetime, asyncio, json, urllib, bs4, requests
+import discord, youtube_dl, subprocess, calendar, datetime, asyncio, json
 
 sys_token = 'NzYxOTI5NDgxNDIxOTc5NjY5.X3hwIA.ItlW0Q2Fej-OyNdbfUKO2czZQvk'
 sys_loop = 1
@@ -308,7 +308,7 @@ def conver(info_dict):
 	for n in range(1, 3):
 		try:
 			#ffmpeg -y -i original.mp3 -af "firequalizer=gain_entry='entry(0,-23);entry(250,-11.5);entry(1000,0);entry(4000,8);entry(16000,16)'" test1.mp3
-			convert = subprocess.run("ffmpeg -i {0}.webm -af \"firequalizer=gain_entry=\'entry(0,5);entry(100,5);entry(250,2);entry(7000,0);entry(9000,1.5);entry(16000,6)\'\" -vbr on -vn -b:a 320000 -c:a libmp3lame -n {0}.mp3".format(info_dict['id']), shell=True)
+			convert = subprocess.run("ffmpeg -i {0}.webm -af \"firequalizer=gain_entry=\'entry(0,3.5);entry(100,1.5);entry(250,0.5);entry(7000,0);entry(9000,1.5);entry(16000,6);entry(20000,6)\'\" -vbr on -vn -b:a 320000 -c:a libmp3lame -n {0}.mp3".format(info_dict['id']), shell=True)
 			data = json.loads(subprocess.run("ffprobe -print_format json -show_streams  -show_format {}.mp3".format(info_dict['id']), stdout=subprocess.PIPE, shell=True).stdout)
 			info_dict['format'] = data['format']
 			info_dict['streams'] = data['streams']
@@ -337,7 +337,7 @@ async def on_ready():
 	q.set(client.get_channel(vcch).guild.voice_client)
 	q.start()
 	while sys_loop == 1:
-		if not voice.is_playing():
+		if not client.get_channel(vcch).guild.voice_client.is_playing():
 			if client.get_channel(vcch).guild.voice_client:
 				q.next()
 		q.set(client.get_channel(vcch).guild.voice_client)
