@@ -186,8 +186,8 @@ class Queue:
 		self.voice.stop()
 	def volume(self, value):
 		self.voice.source = discord.PCMVolumeTransformer(self.voice.source)
-		self.voice.source.volume = float(value)
-		self.volume = float(value)
+		self.voice.source.volume = float(int(value)/100)
+		self.volume = float(int(value)/100)
 	def play(self):
 		self.voice.play(discord.PCMVolumeTransformer(discord.FFmpegPCMAudio('{0}.mp3'.format(self.queue[0]['id'])), volume=self.volume))
 		
@@ -264,8 +264,8 @@ async def commands(command, message):
 	    await message.channel.send(':white_check_mark: **Joined**')
 	elif command == 'volume':
 		if 0 <= int(arg[0]) <= 100:
-			q.volume(float(int(arg[1])/100))
-			await message.channel.send(':white_check_mark: **Successfully changed volume {}%'.format(arg[1]))
+			q.volume(arg[0])
+			await message.channel.send(':white_check_mark: **Successfully changed volume {}%'.format(arg[0]))
 		else:
 			await message.channel.send(':x: Please input between 0-100')
 	elif command == 'queue':
