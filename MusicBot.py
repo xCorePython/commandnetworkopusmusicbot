@@ -346,8 +346,8 @@ async def on_ready():
 		first.append('Converted')
 	if not client.get_channel(vcch).guild.voice_client:
 		await client.get_channel(vcch).connect()
-	q.start()
-	q.set(client.get_channel(vcch).guild.voice_client)
+		q.set(client.get_channel(vcch).guild.voice_client)
+		q.start()
 	await client.get_channel(773053692629876757).send('[endless-play] started')
 	while sys_loop == 1:
 		if client.get_channel(vcch).guild.voice_client:
