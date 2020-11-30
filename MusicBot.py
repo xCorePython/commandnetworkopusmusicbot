@@ -217,8 +217,8 @@ async def commands(command, message):
 			nowpl = duration
 		sendms.add_field(name='Time', value='{} / {}'.format(reverse(nowpl),reverse(info['duration'])),inline=False)
 		sendms.add_field(name='Codec', value=info['streams'][0]['codec_long_name'], inline=False)
-		sendms.add_field(name='Bitrate', value='{}kbps / {}kHz / {}'.format(str(int(info['format']['bit_rate'])/1000), str(int(int(info['streams'][0]['sample_rate'])/1000)), info['streams'][0]['channel_layout']), inline=False)
-		sendms.add_field(name='Volume', value='{}%'.format(q.nvol()), inline=False)
+		sendms.add_field(name='Bitrate', value='{}kbps / {}'.format(str(int(info['format']['bit_rate'])/1000),  info['streams'][0]['channel_layout']), inline=False)
+		sendms.add_field(name='Volume', value='{}%'.format(str(int(q.nvol())*100)), inline=False)
 		sendms.set_thumbnail(url=str(info['thumbnails'][len(info['thumbnails']) - 1]['url']))
 		sendms.set_footer(text='Started at {}'.format(start2.split('.')[0]))
 		await message.channel.send(embed=sendms)
@@ -237,7 +237,7 @@ async def commands(command, message):
 			sendms.set_footer(text='Extracted from {}'.format(info['extractor']))
 			await message.channel.send(embed=sendms)
 			await save()
-			conver('https://youtu.be/{}'.format(info['id']))
+			conver(info)
 	elif command == 'skip':
 		arg = message.content.split(' ')
 		if len(arg) == 1:
@@ -305,19 +305,16 @@ def conv(info_dict):
 	urllib.request.urlretrieve(dllink, title)
 
 def conver(info_dict):
-	for n in range(1, 3):
-		try:
+	try:
 			#ffmpeg -y -i original.mp3 -af "firequalizer=gain_entry='entry(0,-23);entry(250,-11.5);entry(1000,0);entry(4000,8);entry(16000,16)'" test1.mp3
-			convert = subprocess.run("ffmpeg -i {0}.webm -af \"firequalizer=gain_entry=\'entry(0,3.5);entry(100,1.5);entry(250,0.5);entry(7000,0);entry(9000,1.5);entry(16000,6);entry(20000,6)\'\" -vbr on -vn -b:a 320000 -c:a libmp3lame -n {0}.mp3".format(info_dict['id']), shell=True)
-			data = json.loads(subprocess.run("ffprobe -print_format json -show_streams  -show_format {}.mp3".format(info_dict['id']), stdout=subprocess.PIPE, shell=True).stdout)
-			info_dict['format'] = data['format']
-			info_dict['streams'] = data['streams']
-			q.add(info_dict)
-			return info_dict
-			break
-		except:
-			print('Retrying... ({})'.format(n))
-	return 'Failed'
+		convert = subprocess.run("ffmpeg -i {0}.webm -af \"firequalizer=gain_entry=\'entry(0,3.5);entry(100,1.5);entry(250,0.5);entry(7000,0);entry(9000,1.5);entry(16000,6);entry(30000,6)\'\" -vbr on -vn -b:a 320000 -c:a libmp3lame -n {0}.mp3".format(info_dict['id']), shell=True)
+		data = json.loads(subprocess.run("ffprobe -print_format json -show_streams  -show_format {}.mp3".format(info_dict['id']), stdout=subprocess.PIPE, shell=True).stdout)
+		info_dict['format'] = data['format']
+		info_dict['streams'] = data['streams']
+		q.add(info_dict)
+		return info_dict
+	except:
+		return 'Failed'
 
 first = ['Not Converted']
 
@@ -349,6 +346,15 @@ async def on_message(message):
 		prefix = message.content[len(command_prefix):]
 		start = prefix.split(' ')[0]
 		print(start)
+		if start == 'volume':
+			await commands('volume', message)
+			return
+		if start == 'vol':
+			await commands('volume', message)
+			return
+		if start == 'v':
+			await commands('volume', message)
+			return
 		if start == 'q':
 		    await commands('queue', message)
 		    return
