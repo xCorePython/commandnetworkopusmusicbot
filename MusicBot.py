@@ -2,7 +2,7 @@ import discord, youtube_dl, subprocess, calendar, datetime, asyncio, json
 
 sys_token = 'NzYxOTI5NDgxNDIxOTc5NjY5.X3hwIA.ItlW0Q2Fej-OyNdbfUKO2czZQvk'
 sys_token2 = 'NzYwNDkwNjYwNDQzODQ4NzM0.X3M0Hg.lTDx_AvmNNr1spqwUo1wqetaVlM'
-sys_token3 = 'NjgwOTAxMTEyOTA3NTYzMDcx.XxLShg.NdGG5gd8gQ9_GGTqomBBqSfRC08'
+sys_token3 = 'NzIzMjE4MDQ1NjY4OTUwMTE2.XuubSg.1zFOpD-ywOcWj0J2twss7IlhiPE'
 sys_loop = 1
 command_prefix = 'c.'
 client = discord.Client()
