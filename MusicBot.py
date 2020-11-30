@@ -264,7 +264,7 @@ async def commands(command, message):
 	    await message.channel.send(':white_check_mark: **Joined**')
 	elif command == 'volume':
 		if 0 <= int(arg[0]) <= 100:
-			value = float(int(value)/100)
+			value = float(int(arg[0])/100)
 			q.volume(value)
 			await message.channel.send(':white_check_mark: **Successfully changed volume {}%'.format(arg[0]))
 		else:
