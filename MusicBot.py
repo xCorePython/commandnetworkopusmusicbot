@@ -339,7 +339,6 @@ first = ['Not Converted']
 
 @client.event
 async def on_ready():
-	await client.get_channel(vcch).connect(reconnect=10, timeout=120)
 	print('Bot Started')
 	if len(first) == 1:
 		print('Loading queue...')
@@ -349,10 +348,13 @@ async def on_ready():
 		    conver(info)
 		print('Loaded queue')
 		first.append('Converted')
+	if len(first) == 2:
+		await client.get_channel(vcch).connect(reconnect=10)
 		q.set(client.get_channel(vcch).guild.voice_client)
 		q.start()
-	q.set(client.get_channel(vcch).guild.voice_client)
-	await client.get_channel(773053692629876757).send('[endless-play] started')
+		q.set(client.get_channel(vcch).guild.voice_client)
+		await client.get_channel(773053692629876757).send('[endless-play] started')
+		first.append('Joined')
 	while sys_loop == 1:
 		if client.get_channel(vcch).guild.voice_client:
 			if not client.get_channel(vcch).guild.voice_client.is_playing():
