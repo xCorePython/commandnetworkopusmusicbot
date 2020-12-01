@@ -280,11 +280,18 @@ async def commands(command, message):
 		await client.get_channel(vcch).guild.voice_client.disconnect()
 		await message.channel.send(':white_check_mark: **Disconnected**')
 	elif command == 'start':
-		await client.get_channel(vcch).connect()
-		q.set(client.get_channel(vcch).guild.voice_client)
 		try:
+			await client.get_channel(vcch).connect()
+			q.set(client.get_channel(vcch).guild.voice_client)
 			q.start()
-		await client.get_channel(773053692629876757).send('[endless-play] started')
+			await client.get_channel(773053692629876757).send('[endless-play] started')
+		except:
+			try:
+				q.set(client.get_channel(vcch).guild.voice_client)
+				q.start()
+				await client.get_channel(773053692629876757).send('[endless-play] started')
+			except:
+				print('Already playing')
 
 async def create_queue(channelid):
 	messages = await client.get_channel(channelid).history(limit=1).flatten()
@@ -354,7 +361,7 @@ async def on_ready():
 		    conver(info)
 		print('Loaded queue')
 		first.append('Converted')
-	await commands('start')
+	await commands('start', {})
 	while sys_loop == 1:
 		if client.get_channel(vcch).guild.voice_client:
 			if not client.get_channel(vcch).guild.voice_client.is_playing():
