@@ -124,7 +124,7 @@ class Queue:
 		self.np = 0
 		self.queue = []
 		self.voice = None
-		self.volume = 0.1
+		self.volume = 0.01
 
 	def add(self, value):
 		self.queue.append(value)
@@ -186,7 +186,7 @@ class Queue:
 			self.play()
 	def stop(self):
 		self.voice.stop()
-	def volume(self, value):
+	def volume(self, value: float):
 		self.volume = value
 	def play(self):
 		self.voice.play(discord.PCMVolumeTransformer(discord.FFmpegPCMAudio('{0}.mp3'.format(self.queue[0]['id'])), volume=self.volume))
@@ -241,7 +241,7 @@ async def commands(command, message):
 			sendms.add_field(name='Duration', value=reverse(info['duration']))
 			sendms.set_thumbnail(url=str(info['thumbnails'][len(info['thumbnails']) - 1]['url']))
 			sendms.set_footer(text='Extracted from {}'.format(info['extractor']))
-			await editms.edit(embed=sendms)
+			await message.channel.send(embed=sendms)
 			conver(info)
 			await save()
 	elif command == 'skip':
@@ -270,7 +270,7 @@ async def commands(command, message):
 	elif command == 'volume':
 		if 0 <= int(arg[0]) <= 100:
 			client.get_channel(vcch).guild.voice_client.source.volume = float(int(arg[0])/100)
-			q.volume(float(arg[0]))
+			q.volume(float(arg[0])/100)
 			await message.channel.send(':white_check_mark: **Successfully changed volume {}%**'.format(arg[0]))
 		else:
 			await message.channel.send(':x: **Please input between 0-100**')
