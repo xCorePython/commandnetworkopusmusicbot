@@ -200,7 +200,10 @@ async def save():
     for n in range(len(q.np1())):
     	queues.append('https://youtu.be/{}'.format(q.np1()[n]['id']))
     for message in messages:
-    	await message.edit(content='\n'.join(queues))
+    	try:
+    		await message.edit(content='\n'.join(queues))
+    	except:
+    		await message.channel.send(content='\n'.join(queues))
 
 async def commands(command, message):
 	arg = message.content.split(' ')[1:]
@@ -284,12 +287,12 @@ async def commands(command, message):
 			await client.get_channel(vcch).connect()
 			q.set(client.get_channel(vcch).guild.voice_client)
 			q.start()
-			await client.get_channel(773053692629876757).send('[endless-play] started')
+			await np()
 		except:
 			try:
 				q.set(client.get_channel(vcch).guild.voice_client)
 				q.start()
-				await client.get_channel(773053692629876757).send('[endless-play] started')
+				await np()
 			except:
 				print('Already playing')
 
@@ -364,7 +367,7 @@ async def on_ready():
 		    conver(info)
 		print('Loaded queue')
 		first.append('Converted')
-	await commands('start', await client.get_channel(773053692629876757).send('test'))
+	await commands('start', await client.get_channel(773053692629876757).send('[endless-play] started'))
 	while sys_loop == 1:
 		if client.get_channel(vcch).guild.voice_client:
 			if not client.get_channel(vcch).guild.voice_client.is_playing():
