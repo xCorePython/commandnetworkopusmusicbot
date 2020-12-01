@@ -361,7 +361,7 @@ async def on_ready():
 		    conver(info)
 		print('Loaded queue')
 		first.append('Converted')
-	await commands('start', {})
+	await commands('start', await client.get_channel(773053692629876757).send('test'))
 	while sys_loop == 1:
 		if client.get_channel(vcch).guild.voice_client:
 			if not client.get_channel(vcch).guild.voice_client.is_playing():
@@ -381,6 +381,8 @@ async def on_message(message):
 		prefix = message.content[len(command_prefix):]
 		start = prefix.split(' ')[0]
 		print(start)
+		if start == 'start':
+			await commands('start', message)
 		if start == 'volume':
 			await commands('volume', message)
 			return
