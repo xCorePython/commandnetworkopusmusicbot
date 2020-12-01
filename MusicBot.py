@@ -7,7 +7,7 @@ sys_loop = 1
 command_prefix = 'c.'
 client = discord.Client()
 vcch = 734217960222228490
-vcch = #584262828807028746
+#vcch = 584262828807028746
 ydl_opts = {
     'format': 'bestaudio/best',
     'outtmpl': "%(id)s" + '.%(ext)s',
@@ -381,6 +381,7 @@ async def on_ready():
 async def on_message(message):
 	if message.channel.id == 773053692629876757:
 		if message.content == '[endless-play] started':
+			await commands('start', message)
 			await np()
 	if message.content.startswith(command_prefix):
 		prefix = message.content[len(command_prefix):]
