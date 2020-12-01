@@ -306,10 +306,10 @@ def search(value):
 
 async def np():
 	while sys_loop == 1:
-		data = q.np1()
+		data = q.np1()[0]
 		start = q.np2()
 		nptime = float(now_date('off', 9) - float(start))
-		duration = data['format']['duration']
+		duration = float(data['format']['duration'])
 		if nptime > duration:
 			nptime = duration
 		await client.get_channel(782863961153339403).edit(topic='Time : {} / {}\nTitle : {}\nUploader : {}\nCodec : {}\nBitrate : {}kbps / {}'.format(str(reverse(nptime)), str(reverse(duration)), data['title'], data['uploader'], data['streams'][0]['codec_long_name'], str(int(data['format']['bit_rate'])/1000), data['streams'][0]['channel_layout']))
