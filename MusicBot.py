@@ -232,7 +232,7 @@ async def commands(command, message):
 		await message.channel.send(':arrows_counterclockwise: **Searching...**')
 		info = search(' '.join(arg))
 		if info == 'Failed':
-			editms = await message.channel.send(':x: **No result**')
+			await message.channel.send(':x: **No result**')
 		else:
 			sendms = discord.Embed(title='Converting...')
 			link = 'https://youtu.be/' + info['id']
@@ -241,7 +241,7 @@ async def commands(command, message):
 			sendms.add_field(name='Duration', value=reverse(info['duration']))
 			sendms.set_thumbnail(url=str(info['thumbnails'][len(info['thumbnails']) - 1]['url']))
 			sendms.set_footer(text='Extracted from {}'.format(info['extractor']))
-			await editms.edit(embed=sendms)
+			await message.channel.send(embed=sendms)
 			conver(info)
 			await save()
 	elif command == 'skip':
