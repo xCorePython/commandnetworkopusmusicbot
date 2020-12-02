@@ -382,6 +382,8 @@ async def on_message(message):
 			await commands('start', message)
 			await np()
 	if message.content.startswith(command_prefix):
+		if len(restart) == 2:
+		    await message.channel.send(':warning: Bot is usually restart in 16:00-17:00')
 		prefix = message.content[len(command_prefix):]
 		start = prefix.split(' ')[0]
 		print(start)
