@@ -318,7 +318,7 @@ def search(value):
 async def np():
 	data = q.np1()[0]
 	duration = float(data['format']['duration'])
-	await client.get_channel(782863961153339403).edit(topic='Title: {}\nUploader : {}\nDuration : {}\nCodec : {}\nBitrate : {}kbps / {}'.format(str(reverse(duration)), data['title'], data['uploader'], data['streams'][0]['codec_long_name'], str(int(data['format']['bit_rate'])/1000), data['streams'][0]['channel_layout']))
+	await client.get_channel(782863961153339403).edit(topic='Title: {}\nUploader : {}\nDuration : {}\nCodec : {}\nBitrate : {}kbps / {}'.format(data['title'], data['uploader'], str(reverse(duration)), data['streams'][0]['codec_long_name'], str(int(data['format']['bit_rate'])/1000), data['streams'][0]['channel_layout']))
 
 def conv(info_dict):
 	title = info_dict['id'] + '.mp3'
