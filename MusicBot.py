@@ -135,45 +135,45 @@ class Queue:
 		except:
 			return 'Failed'
 	def start(self):
-		self.start = now_date('off', 9)
-		self.start2 = now_date('on', 9)
+		self._start = now_date('off', 9)
+		self._start2 = now_date('on', 9)
 		self.play()
 	def set(self, value):
 		self.voice = value
 	def next(self):
 		if len(self.queue) == 1:
 			self.stop()
-			self.start = now_date('off', 9)
-			self.start2 = now_date('on', 9)
+			self._start = now_date('off', 9)
+			self._start2 = now_date('on', 9)
 			self.play()
 		self.played = self.queue[0]
 		self.queue = self.queue[1:]
 		self.queue.append(self.played)
 		self.stop()
-		self.start = now_date('off', 9)
-		self.start2 = now_date('on', 9)
+		self._start = now_date('off', 9)
+		self._start2 = now_date('on', 9)
 		self.play()
 	def np1(self):
 		return self.queue
 	def np2(self):
-	    return self.start
+	    return self._start
 	def np3(self):
-		return self.start2
+		return self._start2
 	def nvol(self):
 		return self.volume
 	def skip(self, value):
 		if len(self.queue) == 1:
 			self.stop()
-			self.start = now_date('off', 9)
-			self.start2 = now_date('on', 9)
+			self._start = now_date('off', 9)
+			self._start2 = now_date('on', 9)
 			self.play()
 		if value == 1:
 			self.played = self.queue[0]
 			self.queue = self.queue[1:]
 			self.queue.append(self.played)
 			self.stop()
-			self.start = now_date('off', 9)
-			self.start2 = now_date('on', 9)
+			self._start = now_date('off', 9)
+			self._start2 = now_date('on', 9)
 			self.play()
 		else:
 			for n in range(value):
@@ -181,8 +181,8 @@ class Queue:
 				self.queue = self.queue[1:]
 				self.queue.append(self.played)
 			self.stop()
-			self.start = now_date('off', 9)
-			self.start2 = now_date('on', 9)
+			self._start = now_date('off', 9)
+			self._start2 = now_date('on', 9)
 			self.play()
 	def stop(self):
 		self.voice.stop()
@@ -329,11 +329,9 @@ def conv(info_dict):
 	urllib.request.urlretrieve(dllink, title)
 
 def conver(info_dict):
-	if not os.path.isfile('{}.webm'.format(info_dict['id'])):
-		youtube_dl.YoutubeDL(ydl_opts).extract_info('https://youtu.be/{}'.format(info_dict['id']), download=True, process=True)
-	if os.path.isfile('{}.mp4'.format(info_dict['id'])):
-		convert = subprocess.run("ffmpeg -i {0}.mp4 -af \"firequalizer=gain_entry=\'entry(0,4);entry(100,0.5);entry(250,0);entry(7000,0);entry(9000,1.5);entry(16000,9);entry(40000,9)\'\" -vn -b:a 320000 -c:a libmp3lame -n {0}.mp3".format(info_dict['id']), shell=True)
-		data = json.loads(subprocess.run("ffprobe -print_format json -show_streams  -show_format {}.mp4".format(info_dict['id']), stdout=subprocess.PIPE, shell=True).stdout)
+	if os.path.isfile('{}.m4a'.format(info_dict['id'])):
+		convert = subprocess.run("ffmpeg -i {0}.m4a -af \"firequalizer=gain_entry=\'entry(0,4);entry(100,0.5);entry(250,0);entry(7000,0);entry(9000,1.5);entry(16000,9);entry(40000,9)\'\" -vn -b:a 320000 -c:a libmp3lame -n {0}.mp3".format(info_dict['id']), shell=True)
+		data = json.loads(subprocess.run("ffprobe -print_format json -show_streams  -show_format {}.m4a".format(info_dict['id']), stdout=subprocess.PIPE, shell=True).stdout)
 		info_dict['format'] = data['format']
 		info_dict['streams'] = data['streams']
 		q.add(info_dict)
