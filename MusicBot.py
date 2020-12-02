@@ -7,7 +7,7 @@ sys_loop = 1
 command_prefix = 'c.'
 client = discord.Client()
 vcch = 734217960222228490
-#vcch = 584262828807028746
+vcch = 584262828807028746
 ydl_opts = {
     'format': 'bestaudio/best',
     'outtmpl': "%(id)s" + '.%(ext)s',
@@ -124,7 +124,7 @@ class Queue:
 		self.np = 0
 		self.queue = []
 		self.voice = None
-		self.volume = 0.01
+		self.volume = 0.1
 
 	def add(self, value):
 		self.queue.append(value)
@@ -226,7 +226,7 @@ async def commands(command, message):
 		sendms.add_field(name='Volume', value='{}%'.format(str(int(float(client.get_channel(vcch).guild.voice_client.source.volume)*100))), inline=False)
 		sendms.add_field(name='Equalizer', value='Bass: x5.0 Truble: x9.0')
 		sendms.set_thumbnail(url=str(info['thumbnails'][len(info['thumbnails']) - 1]['url']))
-		sendms.set_footer(text='Started at {} | High Quality Technology from FFmpeg | FireEqualizer from FFmpeg')
+		sendms.set_footer(text='Started at {} | High Quality Technology from FFmpeg | FireEqualizer from FFmpeg'.format(start2))
 		await message.channel.send(embed=sendms)
 	elif command == 'play':
 		await message.channel.send(':arrows_counterclockwise: **Searching...**')
@@ -241,7 +241,7 @@ async def commands(command, message):
 			sendms.add_field(name='Duration', value=reverse(info['duration']))
 			sendms.set_thumbnail(url=str(info['thumbnails'][len(info['thumbnails']) - 1]['url']))
 			sendms.set_footer(text='Extracted from {}'.format(info['extractor']))
-			await message.channel.send(embed=sendms)
+			await editms.edit(embed=sendms)
 			conver(info)
 			await save()
 	elif command == 'skip':
@@ -270,7 +270,7 @@ async def commands(command, message):
 	elif command == 'volume':
 		if 0 <= int(arg[0]) <= 100:
 			client.get_channel(vcch).guild.voice_client.source.volume = float(int(arg[0])/100)
-			q.volume(float(arg[0])/100)
+			q.volume(arg[0])
 			await message.channel.send(':white_check_mark: **Successfully changed volume {}%**'.format(arg[0]))
 		else:
 			await message.channel.send(':x: **Please input between 0-100**')
@@ -318,7 +318,7 @@ def search(value):
 async def np():
 	data = q.np1()[0]
 	duration = float(data['format']['duration'])
-	await client.get_channel(782863961153339403).edit(topic='Duration : {}\nUploader : {}\nCodec : {}\nBitrate : {}kbps / {}'.format(str(reverse(duration)), data['title'], data['uploader'], data['streams'][0]['codec_long_name'], str(int(data['format']['bit_rate'])/1000), data['streams'][0]['channel_layout']))
+	await client.get_channel(782863961153339403).edit(topic='Title: {}\nUploader : {}\nDuration : {}\nCodec : {}\nBitrate : {}kbps / {}'.format(str(reverse(duration)), data['title'], data['uploader'], data['streams'][0]['codec_long_name'], str(int(data['format']['bit_rate'])/1000), data['streams'][0]['channel_layout']))
 
 def conv(info_dict):
 	title = info_dict['id'] + '.mp3'
