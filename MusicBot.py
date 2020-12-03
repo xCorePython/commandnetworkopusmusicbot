@@ -122,7 +122,7 @@ def reverse(data):
 class Queue:
 	def __init__(self):
 		self.queue = []
-		self.volume = 0.01
+		self._volume = 0.01
 
 	def add(self, value):
 		self.queue.append(value)
