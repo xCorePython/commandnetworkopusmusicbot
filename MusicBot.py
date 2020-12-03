@@ -365,7 +365,7 @@ async def on_ready():
 				q.next()
 				await np()
 			except:
-				await client.get_channel(vcch).connect()
+				await asyncio.sleep(1)
 		q.set(client.get_channel(vcch).guild.voice_client)
 		await asyncio.sleep(0.1)
 
