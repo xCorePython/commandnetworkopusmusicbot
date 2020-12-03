@@ -121,10 +121,8 @@ def reverse(data):
 
 class Queue:
 	def __init__(self):
-		self.np = 0
 		self.queue = []
-		self.voice = None
-		self.volume = 0.1
+		self.volume = 0.01
 
 	def add(self, value):
 		self.queue.append(value)
@@ -139,7 +137,7 @@ class Queue:
 		self._start2 = now_date('on', 9)
 		self.play()
 	def set(self, value):
-		self.voice = value
+		self._voice = value
 	def next(self):
 		if len(self.queue) == 1:
 			self.stop()
@@ -160,7 +158,7 @@ class Queue:
 	def np3(self):
 		return self._start2
 	def nvol(self):
-		return self.volume
+		return self._volume
 	def skip(self, value):
 		if len(self.queue) == 1:
 			self.stop()
@@ -185,11 +183,11 @@ class Queue:
 			self._start2 = now_date('on', 9)
 			self.play()
 	def stop(self):
-		self.voice.stop()
+		self._voice.stop()
 	def setvolume(self, value):
-		self.volume = value
+		self._volume = value
 	def play(self):
-		self.voice.play(discord.PCMVolumeTransformer(discord.FFmpegPCMAudio('{0}.mp3'.format(self.queue[0]['id'])), volume=self.volume))
+		self._voice.play(discord.PCMVolumeTransformer(discord.FFmpegPCMAudio('{0}.mp3'.format(self.queue[0]['id'])), volume=self._volume))
 		
 
 q = Queue()
@@ -382,8 +380,6 @@ async def on_message(message):
 			await commands('start', message)
 			await np()
 	if message.content.startswith(command_prefix):
-		if len(restart) == 2:
-		    await message.channel.send(':warning: Bot is usually restart in 16:00-17:00')
 		prefix = message.content[len(command_prefix):]
 		start = prefix.split(' ')[0]
 		print(start)
