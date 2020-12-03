@@ -268,7 +268,7 @@ async def commands(command, message):
 	elif command == 'volume':
 		if 0 <= int(arg[0]) <= 100:
 			client.get_channel(vcch).guild.voice_client.source.volume = float(int(arg[0])/100)
-			q.setvolume(float(arg[0]))
+			q.setvolume(float(arg[0])/100)
 			await message.channel.send(':white_check_mark: **Successfully changed volume {}%**'.format(arg[0]))
 		else:
 			await message.channel.send(':x: **Please input between 0-100**')
