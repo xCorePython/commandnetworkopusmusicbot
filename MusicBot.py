@@ -122,7 +122,7 @@ def reverse(data):
 class Queue:
 	def __init__(self):
 		self.queue = []
-		self._volume = 0.01
+		self._volume = 0.1
 
 	def add(self, value):
 		self.queue.append(value)
@@ -187,7 +187,8 @@ class Queue:
 	def setvolume(self, value):
 		self._volume = value
 	def play(self):
-		self._voice.play(discord.PCMVolumeTransformer(discord.FFmpegPCMAudio('{0}.mp3'.format(self.queue[0]['id'])), volume=self._volume))
+		volume = self._volume
+		self._voice.play(discord.PCMVolumeTransformer(discord.FFmpegPCMAudio('{0}.mp3'.format(self.queue[0]['id'])), volume=volume))
 		
 
 q = Queue()
@@ -360,14 +361,14 @@ async def on_ready():
 		first.append('Converted')
 	await client.get_channel(773053692629876757).send('[endless-play] started')
 	while sys_loop == 1:
-		if not client.get_channel(vcch).guild.voice_client.is_playing():
+		if not client.get_channel(vcch).guild.voice_client.is_playing:
 			try:
 				q.next()
 				await np()
 			except:
-				await asyncio.sleep(1)
-		q.set(client.get_channel(vcch).guild.voice_client)
-		await asyncio.sleep(0.1)
+				await asyncio.sleep(0.5)
+				q.set(client.get_channel(vcch).guild.voice_client)
+		await asyncio.sleep(0.5)
 
 @client.event
 async def on_message(message):
@@ -454,4 +455,4 @@ async def on_message(message):
 			await commands('queue', message)
 			return
 
-client.run(sys_token)
+client.run(sys_token3)
