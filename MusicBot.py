@@ -122,7 +122,7 @@ def reverse(data):
 class Queue:
 	def __init__(self):
 		self.queue = []
-		self._volume = 0.1
+		self._volume = 0.01
 
 	def add(self, value):
 		self.queue.append(value)
@@ -140,14 +140,12 @@ class Queue:
 		self._voice = value
 	def next(self):
 		if len(self.queue) == 1:
-			self.stop()
 			self._start = now_date('off', 9)
 			self._start2 = now_date('on', 9)
 			self.play()
 		self.played = self.queue[0]
 		self.queue = self.queue[1:]
 		self.queue.append(self.played)
-		self.stop()
 		self._start = now_date('off', 9)
 		self._start2 = now_date('on', 9)
 		self.play()
@@ -187,8 +185,7 @@ class Queue:
 	def setvolume(self, value):
 		self._volume = value
 	def play(self):
-		volume = self._volume
-		self._voice.play(discord.PCMVolumeTransformer(discord.FFmpegPCMAudio('{0}.mp3'.format(self.queue[0]['id'])), volume=volume))
+		self._voice.play(discord.PCMVolumeTransformer(discord.FFmpegPCMAudio('{0}.mp3'.format(self.queue[0]['id'])), volume=self._volume))
 		
 
 q = Queue()
@@ -269,7 +266,7 @@ async def commands(command, message):
 	elif command == 'volume':
 		if 0 <= int(arg[0]) <= 100:
 			client.get_channel(vcch).guild.voice_client.source.volume = float(int(arg[0])/100)
-			q.setvolume(float(arg[0])/100)
+			q.setvolume(float(arg[0]))
 			await message.channel.send(':white_check_mark: **Successfully changed volume {}%**'.format(arg[0]))
 		else:
 			await message.channel.send(':x: **Please input between 0-100**')
@@ -361,14 +358,14 @@ async def on_ready():
 		first.append('Converted')
 	await client.get_channel(773053692629876757).send('[endless-play] started')
 	while sys_loop == 1:
-		if not client.get_channel(vcch).guild.voice_client.is_playing:
+		if not client.get_channel(vcch).guild.voice_client.is_playing():
 			try:
 				q.next()
 				await np()
 			except:
-				await asyncio.sleep(0.5)
-				q.set(client.get_channel(vcch).guild.voice_client)
-		await asyncio.sleep(0.5)
+				await asyncio.sleep(1)
+		q.set(client.get_channel(vcch).guild.voice_client)
+		await asyncio.sleep(0.1)
 
 @client.event
 async def on_message(message):
@@ -455,4 +452,4 @@ async def on_message(message):
 			await commands('queue', message)
 			return
 
-client.run(sys_token3)
+client.run(sys_token)
