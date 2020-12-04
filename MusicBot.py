@@ -334,11 +334,11 @@ async def on_message(message):
 				await commands('play', message)
 				return
 			if start == 'join':
-		    	await commands('join', message)
-		    	return
+			   await commands('join', message)
+			   return
 			if start == 'r':
-		    	await commands('remove', message)
-		    	return
+			   await commands('remove', message)
+			   return
 			if start == 's':
 				await commands('skip', message)
 				return
