@@ -273,7 +273,6 @@ async def on_ready():
 	if len(first) == 1:
 		print('Loading queue...')
 		links = str(await create_queue(774525604116037662)).split('\n')
-		links.reverse()
 		for n in range(len(links)):
 		    info = search(links[n])
 		    conver(info)
@@ -281,11 +280,12 @@ async def on_ready():
 		first.append('Converted')
 	await client.get_channel(773053692629876757).send('[endless-play] started')
 	while sys_loop == 1:
-		if not client.get_channel(vcch).guild.voice_client.is_playing:
+		if not client.get_channel(vcch).guild.voice_client.is_playing():
 			try:
 				q.next()
 				await np()
 			except:
+				await save()
 				await asyncio.sleep(1)
 		q.set(client.get_channel(vcch).guild.voice_client)
 		await asyncio.sleep(0.1)
