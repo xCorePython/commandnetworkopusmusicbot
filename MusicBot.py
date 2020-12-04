@@ -256,7 +256,8 @@ async def on_ready():
 	print('Bot Started')
 	if len(first) == 1:
 		print('Loading queue...')
-		links = str(await create_queue(774525604116037662)).split('\n').reverse()
+		links = str(await create_queue(774525604116037662)).split('\n')
+		links.reverse()
 		for n in range(len(links)):
 		    info = search(links[n])
 		    conver(info)
