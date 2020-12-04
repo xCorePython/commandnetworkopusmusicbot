@@ -131,7 +131,7 @@ async def commands(command, message):
 		sendms.set_footer(text='Started at {} | High Quality Technology from FFmpeg | FireEqualizer from FFmpeg'.format(start2))
 		await message.channel.send(embed=sendms)
 	elif command == 'play':
-		await message.channel.send(':arrows_counterclockwise: **Searching...**')
+		editms = await message.channel.send(':arrows_counterclockwise: **Searching...**')
 		info = search(' '.join(arg))
 		if info == 'Failed':
 			await message.channel.send(':x: **No result**')
@@ -143,9 +143,22 @@ async def commands(command, message):
 			sendms.add_field(name='Duration', value=reverse(info['duration']))
 			sendms.set_thumbnail(url=str(info['thumbnails'][len(info['thumbnails']) - 1]['url']))
 			sendms.set_footer(text='Extracted from {}'.format(info['extractor']))
-			await message.channel.send(embed=sendms)
-			conver(info)
-			await save()
+			await editms.edit(embed=sendms)
+			info = conver(info)
+			if info == 'Failed':
+				await editms.edit(content=':x: **Convertion Failed**')
+			sendms = discord.Embed(title='Successfully Added')
+			link = 'https://youtu.be/' + info['id']
+			sendms.add_field(name='Title', value='[{}]({})'.format(info['title'], link), inline=False)
+			sendms.add_field(name='Uploader',value='[{}]({})'.format(info['uploader'],info['uploader_url']),inline=False)
+			sendms.add_field(name='Duration', value=reverse(info['duration']))
+			sendms.add_field(name='Codec', value=info['streams'][0]['codec_long_name'], inline=False)
+			sendms.add_field(name='Bitrate', value='{}kbps / {}'.format(str(int(info['format']['bit_rate'])/1000),  info['streams'][0]['channel_layout']), inline=False)
+			sendms.add_field(name='Volume', value='{}%'.format(str(int(float(client.get_channel(vcch).guild.voice_client.source.volume)*100))), inline=False)
+			sendms.add_field(name='Equalizer', value='Bass: x5.0 Truble: x9.0')
+			sendms.set_thumbnail(url=str(info['thumbnails'][len(info['thumbnails']) - 1]['url']))
+			sendms.set_footer(text='Extracted from {} | High Quality Technology from FFmpeg | FireEqualizer from FFmpeg'.format(info['extractor']))
+			await editms.edit(embed=sendms)
 	elif command == 'skip':
 		arg = message.content.split(' ')
 		if len(arg) == 1:
@@ -163,7 +176,10 @@ async def commands(command, message):
 	
 	elif command == 'remove':
 		arg = message.content.split(' ')
-		q.remove(int(arg[1]))
+		info = q.remove(int(arg[1]))
+		if info == 'Failed':
+			await message.channel.send(':x: **Failed : Invalid arg**')
+			return
 		await message.channel.send(':white_check_mark: **Removed**')
 		await save()
 	elif command == 'join':
@@ -284,79 +300,82 @@ async def on_message(message):
 		prefix = message.content[len(command_prefix):]
 		start = prefix.split(' ')[0]
 		print(start)
-		if start == 'start':
-			await commands('start', message)
-		if start == 'volume':
-			await commands('volume', message)
-			return
-		if start == 'vol':
-			await commands('volume', message)
-			return
-		if start == 'v':
-			await commands('volume', message)
-			return
-		if start == 'q':
-		    await commands('queue', message)
-		    return
-		if start == 'n':
-		    await commands('nowplaying', message)
-		    return
-		if start == 'd':
-		    await commands('remove', message)
-		    return
-		if start == 'del':
-		    await commands('remove', message)
-		    return
-		if start == 'dc':
-		    await commands('leave', message)
-		    return
-		if start == 'l':
-		    await commands('leave', message)
-		    return
-		if start == 'p':
-			await commands('play', message)
-			return
-		if start == 'join':
-		    await commands('join', message)
-		    return
-		if start == 'r':
-		    await commands('remove', message)
-		    return
-		if start == 's':
-			await commands('skip', message)
-			return
-		if start == 'np':
-			await commands('nowplaying', message)
-			return
-		if start == 'play':
-			await commands('play', message)
-			return
-		if start == 's':
-			await commands('skip', message)
-			return
-		if start == 'skip':
-			await commands('skip', message)
-			return
-		if start == 'now':
-			await commands('nowplaying', message)
-			return
-		if start == 'nowplaying':
-			await commands('nowplaying', message)
-			return
-		if start == 'remove':
-			await commands('remove', message)
-			return
-		if start == 'delete':
-			await commands('remove', message)
-			return
-		if start == 'j':
-			await commands('join', message)
-			return
-		if start == 'leave':
-			await commands('leave', message)
-			return
-		if start == 'queue':
-			await commands('queue', message)
-			return
+		try:
+			if start == 'start':
+				await commands('start', message)
+			if start == 'volume':
+				await commands('volume', message)
+				return
+			if start == 'vol':
+				await commands('volume', message)
+				return
+			if start == 'v':
+				await commands('volume', message)
+				return
+			if start == 'q':
+			    await commands('queue', message)
+			    return
+			if start == 'n':
+			    await commands('nowplaying', message)
+			    return
+			if start == 'd':
+			    await commands('remove', message)
+			    return
+			if start == 'del':
+		   	 await commands('remove', message)
+		   	 return
+			if start == 'dc':
+			    await commands('leave', message)
+			    return
+			if start == 'l':
+			    await commands('leave', message)
+			    return
+			if start == 'p':
+				await commands('play', message)
+				return
+			if start == 'join':
+		    	await commands('join', message)
+		    	return
+			if start == 'r':
+		    	await commands('remove', message)
+		    	return
+			if start == 's':
+				await commands('skip', message)
+				return
+			if start == 'np':
+				await commands('nowplaying', message)
+				return
+			if start == 'play':
+				await commands('play', message)
+				return
+			if start == 's':
+				await commands('skip', message)
+				return
+			if start == 'skip':
+				await commands('skip', message)
+				return
+			if start == 'now':
+				await commands('nowplaying', message)
+				return
+			if start == 'nowplaying':
+				await commands('nowplaying', message)
+				return
+			if start == 'remove':
+				await commands('remove', message)
+				return
+			if start == 'delete':
+				await commands('remove', message)
+				return
+			if start == 'j':
+				await commands('join', message)
+				return
+			if start == 'leave':
+				await commands('leave', message)
+				return
+			if start == 'queue':
+				await commands('queue', message)
+				return
+		except:
+			await message.channel.send(':x: **Failed run command**')
 
 client.run(sys_token)
