@@ -1,4 +1,4 @@
-import discord, youtube_dl, subprocess, calendar, datetime, asyncio, json, os
+import discord, youtube_dl, subprocess, calendar, datetime, asyncio, json, os, advancedtime
 
 sys_token = 'NzYxOTI5NDgxNDIxOTc5NjY5.X3hwIA.ItlW0Q2Fej-OyNdbfUKO2czZQvk'
 sys_token2 = 'NzYwNDkwNjYwNDQzODQ4NzM0.X3M0Hg.lTDx_AvmNNr1spqwUo1wqetaVlM'
@@ -21,103 +21,9 @@ ydl_opts = {
 #    {'key': 'FFmpegMetadata'},],
 }
 
-def now_month(mode):
-	if mode == 'total':
-		now = datetime.datetime.utcnow()
-		if now.month == 1:
-			a01 = 0
-			for n in range(1):
-				nowcalendar = str(
-				    calendar.month(
-				        int('{}'.format(now.year)), int('{}'.format(n))))
-				a01 = a01 + int(nowcalendar[int(len(nowcalendar) -
-				                                3):int(len(nowcalendar) - 1)])
-			a01 = a01 + now.day
-			return a01
-		if now.month > 2:
-			a01 = 0
-			for n in range(1, now.month):
-				nowcalendar = str(
-				    calendar.month(
-				        int('{}'.format(now.year)), int('{}'.format(n))))
-				a01 = a01 + int(nowcalendar[int(len(nowcalendar) -
-				                                3):int(len(nowcalendar) - 1)])
-			a01 = a01 + now.day
-			return a01
-	if mode == 'month':
-		now = datetime.datetime.utcnow()
-		nowcalendar = str(
-		    calendar.month(
-		        int('{}'.format(now.year)), int('{}'.format(now.month))))
-		a01 = int(
-		    nowcalendar[int(len(nowcalendar) - 3):int(len(nowcalendar) - 1)])
-		return a01
-
-
-def now_date(mode, location):
-	if mode == 'off':
-		now = datetime.datetime.utcnow()
-		return float(now.strftime("0.%f")) + int(now.second) + int(
-		    int(int(now.month * 365) + int(now_month('month'))) * 86400) + int(
-		        int(now.day) * 86400) + int(int(now.hour) * 3600) + int(
-		            int(now.minute) * 60)
-	if mode == 'on':
-		now = datetime.datetime.utcnow()
-		locationtime = location
-		year = now.year
-		hour = now.hour + locationtime
-		day = now.day
-		month = now.month
-		if hour > 24:
-			hour2 = hour / 24
-			hour = hour - int(hour2 * 24)
-			day = day + 1
-			if day > now_month('month'):
-				month = month + 1
-				if month > 12:
-					month = month - 12
-					year = year + 1
-		a01 = datetime.datetime(year, month, day, hour, now.minute, now.second, int(now.strftime("%f")))
-		return a01.strftime("%Y/%m/%d %H:%M:%S.%f")
-
-def reverse(data):
-	time = int(float(data))
-	if time < 10:
-		second = int(time)
-		uptime = '0:0' + str(second)
-		return uptime
-	if time >= 60:
-		if time < 3600:
-			minute = int(time / 60)
-			second = int(time - minute * 60)
-			if second < 10:
-				uptime = str(minute) + ':0' + str(second)
-				return uptime
-			else:
-				uptime = str(minute) + ':' + str(second)
-				return uptime
-		else:
-			hour = int(time / 3600)
-			minute = int(int(time - hour * 3600) / 60)
-			second = int(time - hour * 3600 - minute * 60)
-			if minute < 10:
-				if second < 10:
-					uptime = str(hour) + ':0' + str(minute) + ':0' + str(
-					    second)
-					return uptime
-				else:
-					uptime = str(hour) + ':0' + str(minute) + ':' + str(second)
-					return uptime
-			else:
-				if second < 10:
-					uptime = str(hour) + ':' + str(minute) + ':0' + str(second)
-					return uptime
-				else:
-					uptime = str(hour) + ':' + str(minute) + ':' + str(second)
-					return uptime
-	else:
-		uptime = '0:' + str(time)
-		return uptime
+reverse = advancedtime.advancedtime().fetchtime
+now_date = advancedtime.advancedtime().checktime
+now_month = advancedtime.advancedtime().checkmonth
 
 class Queue:
 	def __init__(self):
@@ -358,7 +264,7 @@ async def on_ready():
 		first.append('Converted')
 	await client.get_channel(773053692629876757).send('[endless-play] started')
 	while sys_loop == 1:
-		if not client.get_channel(vcch).guild.voice_client.is_playing():
+		if not client.get_channel(vcch).guild.voice_client.is_playing:
 			try:
 				q.next()
 				await np()
