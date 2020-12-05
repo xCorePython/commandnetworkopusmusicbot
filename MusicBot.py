@@ -20,6 +20,10 @@ ydl_opts = {
 #        'preferredquality': '320'},
 #    {'key': 'FFmpegMetadata'},],
 }
+FFMPEG_OPTIONS = {
+	'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5',
+	'options': '-vn -b:a 320000 -af \"firequalizer=gain_entry=\'entry(0,4);entry(30,0.5);entry(50,¹);entry(7000,0);entry(9000,1.5);entry(16000,9);entry(40000,9)\'\"',
+}
 
 reverse = advancedtime.advancedtime().fetchtime
 now_date = advancedtime.advancedtime().checktime
@@ -91,7 +95,7 @@ class Queue:
 	def setvolume(self, value):
 		self._volume = value
 	def play(self):
-		self._voice.play(discord.PCMVolumeTransformer(discord.FFmpegPCMAudio('{0}.mp3'.format(self.queue[0]['id'])), volume=self._volume))
+		self._voice.play(discord.PCMVolumeTransformer(discord.FFmpegPCMAudio('{0}'.format(self.queue[0]['path']), **FFMPEG_OPTIONS), volume=self._volume))
 		
 
 q = Queue()
@@ -158,7 +162,7 @@ async def commands(command, message):
 			sendms.add_field(name='Equalizer', value='Bass: x5.0 Truble: x9.0')
 			sendms.set_thumbnail(url=str(info['thumbnails'][len(info['thumbnails']) - 1]['url']))
 			sendms.set_footer(text='Extracted from {} | High Quality Technology from FFmpeg | FireEqualizer from FFmpeg'.format(info['extractor']))
-			await editms.edit(embed=sendms)
+			await editms.edit(content=None, embed=sendms)
 	elif command == 'skip':
 		arg = message.content.split(' ')
 		if len(arg) == 1:
@@ -224,11 +228,11 @@ def search(value):
 				else:
 					error = raiseerror
 			else:
-				info_dict = youtube_dl.YoutubeDL(ydl_opts).extract_info("ytsearch:{}".format(value), download=True, process=True)
+				info_dict = youtube_dl.YoutubeDL(ydl_opts).extract_info("ytsearch:{}".format(value), download=False, process=False)
 				if not info_dict:
 					error = raiseerror
 				else:
-					return info_dict['entries'][0]
+					search('https://youtu.be/{}'.format(info_dict['entries'][0]['id']))
 		except:
 			print('Retrying... ({})'.format(n))
 	return 'Failed'
@@ -248,24 +252,28 @@ def conv(info_dict):
 
 def conver(info_dict):
 	if os.path.isfile('{}.m4a'.format(info_dict['id'])):
-		convert = subprocess.run("ffmpeg -i {0}.m4a -af \"firequalizer=gain_entry=\'entry(0,4);entry(100,0.5);entry(250,0);entry(7000,0);entry(9000,1.5);entry(16000,9);entry(40000,9)\'\" -vn -b:a 320000 -c:a libmp3lame -n {0}.mp3".format(info_dict['id']), shell=True)
+		#convert = subprocess.run("ffmpeg -i {0}.m4a -af \"firequalizer=gain_entry=\'entry(0,4);entry(100,0.5);entry(250,0);entry(7000,0);entry(9000,1.5);entry(16000,9);entry(40000,9)\'\" -vn -b:a 320000 -c:a libmp3lame -n {0}.mp3".format(info_dict['id']), shell=True)
 		data = json.loads(subprocess.run("ffprobe -print_format json -show_streams  -show_format {}.m4a".format(info_dict['id']), stdout=subprocess.PIPE, shell=True).stdout)
+		info_dict['path'] = info_dict['id'] + '.m4a'
 		info_dict['format'] = data['format']
 		info_dict['streams'] = data['streams']
 		q.add(info_dict)
 		return info_dict
 	try:
-			#ffmpeg -y -i original.mp3 -af "firequalizer=gain_entry='entry(0,-23);entry(250,-11.5);entry(1000,0);entry(4000,8);entry(16000,16)'" test1.mp3
-		convert = subprocess.run("ffmpeg -i {0}.webm -af \"firequalizer=gain_entry=\'entry(0,4);entry(100,0.5);entry(250,0);entry(7000,0);entry(9000,1.5);entry(16000,9);entry(40000,9)\'\" -vn -b:a 320000 -c:a libmp3lame -n {0}.mp3".format(info_dict['id']), shell=True)
+		#ffmpeg -y -i original.mp3 -af "firequalizer=gain_entry='entry(0,-23);entry(250,-11.5);entry(1000,0);entry(4000,8);entry(16000,16)'" test1.mp3
+		#convert = subprocess.run("ffmpeg -i {0}.webm -af \"firequalizer=gain_entry=\'entry(0,4);entry(100,0.5);entry(250,0);entry(7000,0);entry(9000,1.5);entry(16000,9);entry(40000,9)\'\" -vn -b:a 320000 -c:a libmp3lame -n {0}.mp3".format(info_dict['id']), shell=True)
 		data = json.loads(subprocess.run("ffprobe -print_format json -show_streams  -show_format {}.webm".format(info_dict['id']), stdout=subprocess.PIPE, shell=True).stdout)
 		info_dict['format'] = data['format']
 		info_dict['streams'] = data['streams']
+		info_dict['path'] = info_dict['id'] + '.webm'
 		q.add(info_dict)
 		return info_dict
 	except:
 		return 'Failed'
 
 first = ['Not Converted']
+
+
 
 @client.event
 async def on_ready():
@@ -284,11 +292,10 @@ async def on_ready():
 			try:
 				q.next()
 				await np()
-			except:
 				await save()
-				await asyncio.sleep(1)
-		q.set(client.get_channel(vcch).guild.voice_client)
-		await asyncio.sleep(0.1)
+			except:
+				q.set(client.get_channel(vcch).guild.voice_client)
+		await asyncio.sleep(0.5)
 
 @client.event
 async def on_message(message):
