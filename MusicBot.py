@@ -14,6 +14,7 @@ ydl_opts = {
     'ignoreerrors': True,
     'noplaylist': True,
     'quiet': True,
+    'no-overwrite': True,
 #	'postprocessors': [{
 #    	'key': 'FFmpegExtractAudio',
 #        'preferredcodec': 'mp3',
@@ -21,7 +22,7 @@ ydl_opts = {
 #    {'key': 'FFmpegMetadata'},],
 }
 FFMPEG_OPTIONS = {
-	'options': '-vn -b:a 320000 -af \"firequalizer=gain_entry=\'entry(0,4);entry(30,0.5);entry(50,¹);entry(7000,0);entry(9000,1.5);entry(16000,9);entry(40000,9)\'\"',
+	'options': '-vn -b:a 320000 -af \"firequalizer=gain_entry=\'entry(0,4);entry(30,0.5);entry(50,-3);entry(7000,-3);entry(9000,1.5);entry(16000,9);entry(80000,9)\'\"',
 }
 
 reverse = advancedtime.advancedtime().fetchtime
