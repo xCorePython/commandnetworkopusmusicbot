@@ -1,4 +1,4 @@
-import discord, youtube_dl, subprocess, calendar, datetime, asyncio, json, os, advancedtime
+import discord, youtube_dl, subprocess, calendar, datetime, asyncio, json, os, advancedtime, urllib, requests
 
 sys_token = 'NzYxOTI5NDgxNDIxOTc5NjY5.X3hwIA.ItlW0Q2Fej-OyNdbfUKO2czZQvk'
 sys_token2 = 'NzYwNDkwNjYwNDQzODQ4NzM0.X3M0Hg.lTDx_AvmNNr1spqwUo1wqetaVlM'
@@ -23,7 +23,7 @@ ydl_opts = {
 }
 #-b:a 320000 
 FFMPEG_OPTIONS = {
-	'options': '-b:a 320000 -af \"firequalizer=gain_entry=\'entry(0,5);entry(30,0.5);entry(50,-3);entry(6000,-1);entry(9000,9);entry(21000,12)\', volume=-6dB\"',
+	'options': '-af \"firequalizer=gain_entry=\'entry(0,5);entry(30,0.5);entry(50,-3);entry(6000,-1);entry(9000,9);entry(21000,12)\'\"',
 }
 
 reverse = advancedtime.advancedtime().fetchtime
@@ -33,7 +33,7 @@ now_month = advancedtime.advancedtime().checkmonth
 class Queue:
 	def __init__(self):
 		self.queue = []
-		self._volume = 1
+		self._volume = 0.1
 
 	def add(self, value):
 		self.queue.append(value)
@@ -96,7 +96,7 @@ class Queue:
 	def setvolume(self, value):
 		self._volume = value
 	def play(self):
-		self._voice.play(discord.FFmpegPCMAudio('{0}'.format(self.queue[0]['path']), **FFMPEG_OPTIONS))#, volume=self._volume))(discord.PCMVolumeTransformer
+		self._voice.play(discord.PCMVolumeTransformer(discord.FFmpegPCMAudio('{0}.mp3'.format(self.queue[0]['id']), **FFMPEG_OPTIONS), volume=self._volume))
 		
 
 q = Queue()
@@ -212,10 +212,18 @@ async def create_queue(channelid):
 	for message in messages:
 		return message.content
 
+def conv(info_dict):
+	title = info_dict['id'] + '.mp3'
+	url = 'https://www.320youtube.com/watch?v={}'.format(info_dict['id'])
+	result = requests.get(url).text
+	dllink = str(str(result).split('href=')[8])[1:].split('" rel')[0]
+	urllib.request.urlretrieve(dllink, title)
+
 def dl(value):
 	for n in range(1, 3):
 		try:
 			info_dict = youtube_dl.YoutubeDL(ydl_opts).extract_info(value, download=True, process=True)
+			conv(info_dict)
 			if not info_dict:
 				error = raiseerror
 			else:
@@ -243,17 +251,9 @@ async def np():
 	duration = float(data['format']['duration'])
 	await client.get_channel(782863961153339403).edit(topic='Title: {}\nUploader : {}\nDuration : {}\nCodec : {}\nBitrate : {}kbps / {}'.format(data['title'], data['uploader'], str(reverse(duration)), data['streams'][0]['codec_long_name'], str(int(data['format']['bit_rate'])/1000), data['streams'][0]['channel_layout']))
 
-def conv(info_dict):
-	title = info_dict['id'] + '.mp3'
-	url = 'https://www.320youtube.com/watch?v={}'.format(info_dict['id'])
-	result = requests.get(url)
-	soup = bs4.BeautifulSoup(result.text, 'html.parser')
-	dllink = str(str(soup).split('href=')[8])[1:].split('" rel')[0]
-	urllib.request.urlretrieve(dllink, title)
-
 def conver(info_dict):
 	if os.path.isfile('{}.m4a'.format(info_dict['id'])):
-		#convert = subprocess.run("ffmpeg -i {0}.m4a -af \"firequalizer=gain_entry=\'entry(0,4);entry(100,0.5);entry(250,0);entry(7000,0);entry(9000,1.5);entry(16000,9);entry(40000,9)\'\" -vn -b:a 320000 -c:a libmp3lame -n {0}.mp3".format(info_dict['id']), shell=True)
+		convert = subprocess.run("ffmpeg -i {0}.m4a -af \"firequalizer=gain_entry=\'entry(0,4);entry(100,0.5);entry(250,0);entry(7000,0);entry(9000,1.5);entry(16000,9);entry(40000,9)\'\" -vn -b:a 320000 -c:a libopus -n {0}.opus".format(info_dict['id']), shell=True)
 		data = json.loads(subprocess.run("ffprobe -print_format json -show_streams  -show_format {}.m4a".format(info_dict['id']), stdout=subprocess.PIPE, shell=True).stdout)
 		info_dict['path'] = info_dict['id'] + '.m4a'
 		info_dict['format'] = data['format']
@@ -262,7 +262,7 @@ def conver(info_dict):
 		return info_dict
 	try:
 		#ffmpeg -y -i original.mp3 -af "firequalizer=gain_entry='entry(0,-23);entry(250,-11.5);entry(1000,0);entry(4000,8);entry(16000,16)'" test1.mp3
-		#convert = subprocess.run("ffmpeg -i {0}.webm -af \"firequalizer=gain_entry=\'entry(0,4);entry(100,0.5);entry(250,0);entry(7000,0);entry(9000,1.5);entry(16000,9);entry(40000,9)\'\" -vn -b:a 320000 -c:a libmp3lame -n {0}.mp3".format(info_dict['id']), shell=True)
+		convert = subprocess.run("ffmpeg -i {0}.webm -af \"firequalizer=gain_entry=\'entry(0,4);entry(100,0.5);entry(250,0);entry(7000,0);entry(9000,1.5);entry(16000,9);entry(40000,9)\'\" -vn -b:a 320000 -c:a libmp3lame -n {0}".format(info_dict['id']), shell=True)
 		data = json.loads(subprocess.run("ffprobe -print_format json -show_streams  -show_format {}.webm".format(info_dict['id']), stdout=subprocess.PIPE, shell=True).stdout)
 		info_dict['format'] = data['format']
 		info_dict['streams'] = data['streams']
@@ -273,8 +273,6 @@ def conver(info_dict):
 		return 'Failed'
 
 first = ['Not Converted']
-
-
 
 @client.event
 async def on_ready():
