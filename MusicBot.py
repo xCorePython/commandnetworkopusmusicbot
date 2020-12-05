@@ -23,7 +23,7 @@ ydl_opts = {
 }
 #-b:a 320000 
 FFMPEG_OPTIONS = {
-	'options': '-c:a libopus -b:a 320000 -af \"firequalizer=gain_entry=\'entry(0,5);entry(30,0.5);entry(50,-3);entry(6000,-1);entry(9000,9);entry(21000,12)\', volume=-6db\"',
+	'options': '-c:a libopus -b:a 320000 -af \"firequalizer=gain_entry=\'entry(0,5);entry(30,0.5);entry(50,-3);entry(6000,-1);entry(9000,9);entry(21000,12)\', volume=-6dB\"',
 }
 
 reverse = advancedtime.advancedtime().fetchtime
