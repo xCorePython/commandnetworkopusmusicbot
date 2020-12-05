@@ -23,7 +23,7 @@ ydl_opts = {
 }
 #-b:a 320000 
 FFMPEG_OPTIONS = {
-	'options': '-c:a libopus -b:a 320000 -af \"firequalizer=gain_entry=\'entry(0,5);entry(30,0.5);entry(50,-3);entry(6000,-1);entry(9000,9);entry(21000,12)\', volume=-6dB\"',
+	'options': '-b:a 320000 -af \"firequalizer=gain_entry=\'entry(0,5);entry(30,0.5);entry(50,-3);entry(6000,-1);entry(9000,9);entry(21000,12)\', volume=-6dB\"',
 }
 
 reverse = advancedtime.advancedtime().fetchtime
@@ -33,7 +33,7 @@ now_month = advancedtime.advancedtime().checkmonth
 class Queue:
 	def __init__(self):
 		self.queue = []
-		self._volume = 0.01
+		self._volume = 1
 
 	def add(self, value):
 		self.queue.append(value)
@@ -96,7 +96,7 @@ class Queue:
 	def setvolume(self, value):
 		self._volume = value
 	def play(self):
-		self._voice.play(discord.PCMVolumeTransformer(discord.FFmpegPCMAudio('{0}'.format(self.queue[0]['path']), **FFMPEG_OPTIONS), volume=self._volume))
+		self._voice.play(discord.FFmpegPCMAudio('{0}'.format(self.queue[0]['path']), **FFMPEG_OPTIONS))#, volume=self._volume))(discord.PCMVolumeTransformer
 		
 
 q = Queue()
