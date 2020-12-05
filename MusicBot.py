@@ -23,7 +23,7 @@ ydl_opts = {
 }
 #-b:a 320000 
 FFMPEG_OPTIONS = {
-	'options': '-b:a 320000 -af \"firequalizer=gain_entry=\'entry(0,4);entry(30,0.5);entry(50,-3);entry(7000,-1);entry(9000,2);entry(16000,9);entry(80000,9)\'\"',
+	'options': '-b:a 320000 -af \"firequalizer=gain_entry=\'entry(0,5);entry(30,0.5);entry(50,-3);entry(6000,-1);entry(9000,9);entry(21000,12)\'\"',
 }
 
 reverse = advancedtime.advancedtime().fetchtime
@@ -221,7 +221,7 @@ def dl(value):
 			else:
 				return info_dict
 		except:
-			print('Rrtrying... ({})'.format(str(n)))
+			print('Retrying... ({})'.format(str(n)))
 
 def search(value):
 	for n in range(1, 3):
@@ -229,11 +229,11 @@ def search(value):
 			if value.startswith('https://'):
 				return dl(value)
 			else:
-				info_dict = youtube_dl.YoutubeDL(ydl_opts).extract_info("ytsearch:{}".format(value), download=False, process=False)
+				info_dict = youtube_dl.YoutubeDL(ydl_opts).extract_info("ytsearch:{}".format(value), download=False, process=True)
 				if not info_dict:
 					error = raiseerror
 				else:
-					return dl('https://youtu.be/{}'.format(info_dict['entries'][0]))
+					return dl('https://youtu.be/{}'.format(info_dict['entries'][0]['id']))
 		except:
 			print('Retrying... ({})'.format(n))
 	return 'Failed'
@@ -387,4 +387,4 @@ async def on_message(message):
 		except:
 			await message.channel.send(':x: **Failed run command**')
 
-client.run(sys_token3)
+client.run(sys_token)
