@@ -280,6 +280,7 @@ async def on_ready():
 		    conver(info)
 		print('Loaded queue')
 		first.append('Converted')
+	await client.get_channel(773053692629876757).send('[endless-play] started')
 	while sys_loop == 1:
 		if not client.get_channel(vcch).guild.voice_client.is_playing():
 			try:
