@@ -23,7 +23,7 @@ ydl_opts = {
 }
 #-b:a 320000 
 FFMPEG_OPTIONS = {
-	'options': '-af \"firequalizer=gain_entry=\'entry(0,4);entry(30,0.5);entry(50,-3);entry(7000,-3);entry(9000,1.5);entry(16000,9);entry(80000,9)\'\"',
+	'options': '-b:a 320000 -af \"firequalizer=gain_entry=\'entry(0,4);entry(30,0.5);entry(50,-3);entry(7000,-1);entry(9000,2);entry(16000,9);entry(80000,9)\'\"',
 }
 
 reverse = advancedtime.advancedtime().fetchtime
@@ -212,21 +212,28 @@ async def create_queue(channelid):
 	for message in messages:
 		return message.content
 
+def dl(value):
+	for n in range(1, 3):
+		try:
+			info_dict = youtube_dl.YoutubeDL(ydl_opts).extract_info(value, download=True, process=True)
+			if not info_dict:
+				error = raiseerror
+			else:
+				return info_dict
+		except:
+			print('Rrtrying... ({})'.format(str(n)))
+
 def search(value):
 	for n in range(1, 3):
 		try:
 			if value.startswith('https://'):
-				info_dict = youtube_dl.YoutubeDL(ydl_opts).extract_info(value, download=True, process=True)
-				if info_dict:
-					return info_dict
-				else:
-					error = raiseerror
+				return dl(value)
 			else:
 				info_dict = youtube_dl.YoutubeDL(ydl_opts).extract_info("ytsearch:{}".format(value), download=False, process=False)
 				if not info_dict:
 					error = raiseerror
 				else:
-					search('https://youtu.be/{}'.format(info_dict['entries'][0]['id']))
+					return dl('https://youtu.be/{}'.format(info_dict['entries'][0]))
 		except:
 			print('Retrying... ({})'.format(n))
 	return 'Failed'
@@ -284,12 +291,13 @@ async def on_ready():
 	while sys_loop == 1:
 		if not client.get_channel(vcch).guild.voice_client.is_playing():
 			try:
+				q.set(client.get_channel(vcch).guild.voice_client)
 				q.next()
 				await np()
 				await save()
 			except:
-				q.set(client.get_channel(vcch).guild.voice_client)
-		await asyncio.sleep(0.5)
+				await asyncio.sleep(1)
+		await asyncio.sleep(1)
 
 @client.event
 async def on_message(message):
