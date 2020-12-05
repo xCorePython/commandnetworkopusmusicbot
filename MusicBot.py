@@ -140,17 +140,10 @@ async def commands(command, message):
 		if info == 'Failed':
 			await message.channel.send(':x: **No result**')
 		else:
-			sendms = discord.Embed(title='Converting...')
-			link = 'https://youtu.be/' + info['id']
-			sendms.add_field(name='Title', value='[{}]({})'.format(info['title'], link), inline=False)
-			sendms.add_field(name='Uploader',value='[{}]({})'.format(info['uploader'],info['uploader_url']),inline=False)
-			sendms.add_field(name='Duration', value=reverse(info['duration']))
-			sendms.set_thumbnail(url=str(info['thumbnails'][len(info['thumbnails']) - 1]['url']))
-			sendms.set_footer(text='Extracted from {}'.format(info['extractor']))
-			await editms.edit(embed=sendms)
 			info = conver(info)
 			if info == 'Failed':
-				await editms.edit(content=':x: **Convertion Failed**')
+				await editms.edit(content=':x: **Download Failed**')
+				return
 			sendms = discord.Embed(title='Successfully Added')
 			link = 'https://youtu.be/' + info['id']
 			sendms.add_field(name='Title', value='[{}]({})'.format(info['title'], link), inline=False)
