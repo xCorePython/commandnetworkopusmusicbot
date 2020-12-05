@@ -253,20 +253,20 @@ async def np():
 
 def conver(info_dict):
 	if os.path.isfile('{}.m4a'.format(info_dict['id'])):
-		convert = subprocess.run("ffmpeg -i {0}.m4a -af \"firequalizer=gain_entry=\'entry(0,4);entry(100,0.5);entry(250,0);entry(7000,0);entry(9000,1.5);entry(16000,9);entry(40000,9)\'\" -vn -b:a 320000 -c:a libopus -n {0}.opus".format(info_dict['id']), shell=True)
+		#convert = subprocess.run("ffmpeg -i {0}.m4a -af \"firequalizer=gain_entry=\'entry(0,4);entry(100,0.5);entry(250,0);entry(7000,0);entry(9000,1.5);entry(16000,9);entry(40000,9)\'\" -vn -b:a 320000 -c:a libopus -n {0}.opus".format(info_dict['id']), shell=True)
 		data = json.loads(subprocess.run("ffprobe -print_format json -show_streams  -show_format {}.m4a".format(info_dict['id']), stdout=subprocess.PIPE, shell=True).stdout)
-		info_dict['path'] = info_dict['id'] + '.m4a'
+		info_dict['path'] = info_dict['id'] + '.mp3'
 		info_dict['format'] = data['format']
 		info_dict['streams'] = data['streams']
 		q.add(info_dict)
 		return info_dict
 	try:
 		#ffmpeg -y -i original.mp3 -af "firequalizer=gain_entry='entry(0,-23);entry(250,-11.5);entry(1000,0);entry(4000,8);entry(16000,16)'" test1.mp3
-		convert = subprocess.run("ffmpeg -i {0}.webm -af \"firequalizer=gain_entry=\'entry(0,4);entry(100,0.5);entry(250,0);entry(7000,0);entry(9000,1.5);entry(16000,9);entry(40000,9)\'\" -vn -b:a 320000 -c:a libmp3lame -n {0}".format(info_dict['id']), shell=True)
+		#convert = subprocess.run("ffmpeg -i {0}.webm -af \"firequalizer=gain_entry=\'entry(0,4);entry(100,0.5);entry(250,0);entry(7000,0);entry(9000,1.5);entry(16000,9);entry(40000,9)\'\" -vn -b:a 320000 -c:a libmp3lame -n {0}".format(info_dict['id']), shell=True)
 		data = json.loads(subprocess.run("ffprobe -print_format json -show_streams  -show_format {}.webm".format(info_dict['id']), stdout=subprocess.PIPE, shell=True).stdout)
 		info_dict['format'] = data['format']
 		info_dict['streams'] = data['streams']
-		info_dict['path'] = info_dict['id'] + '.webm'
+		info_dict['path'] = info_dict['id'] + '.mp3'
 		q.add(info_dict)
 		return info_dict
 	except:
