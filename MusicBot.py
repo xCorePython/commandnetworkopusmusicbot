@@ -21,8 +21,9 @@ ydl_opts = {
 #        'preferredquality': '320'},
 #    {'key': 'FFmpegMetadata'},],
 }
+#-b:a 320000 
 FFMPEG_OPTIONS = {
-	'options': '-vn -b:a 320000 -af \"firequalizer=gain_entry=\'entry(0,4);entry(30,0.5);entry(50,-3);entry(7000,-3);entry(9000,1.5);entry(16000,9);entry(80000,9)\'\"',
+	'options': '-vn -af \"firequalizer=gain_entry=\'entry(0,4);entry(30,0.5);entry(50,-3);entry(7000,-3);entry(9000,1.5);entry(16000,9);entry(80000,9)\'\"',
 }
 
 reverse = advancedtime.advancedtime().fetchtime
