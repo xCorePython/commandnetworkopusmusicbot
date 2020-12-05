@@ -21,7 +21,6 @@ ydl_opts = {
 #    {'key': 'FFmpegMetadata'},],
 }
 FFMPEG_OPTIONS = {
-	'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5',
 	'options': '-vn -b:a 320000 -af \"firequalizer=gain_entry=\'entry(0,4);entry(30,0.5);entry(50,¹);entry(7000,0);entry(9000,1.5);entry(16000,9);entry(40000,9)\'\"',
 }
 
