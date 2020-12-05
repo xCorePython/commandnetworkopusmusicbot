@@ -95,8 +95,10 @@ class Queue:
 		self._voice.stop()
 	def setvolume(self, value):
 		self._volume = value
+	def method(self):
+		return 
 	def play(self):
-		self._voice.play(discord.PCMVolumeTransformer(discord.FFmpegPCMAudio('{0}'.format(self.queue[0]['path']), **FFMPEG_OPTIONS), volume=self._volume))
+		self._voice.play(discord.FFmpegOpusAudio(self.queue[0]['path'], **FFMPEG_OPTIONS, codec='libopus', bitrate=320))
 		
 
 q = Queue()
@@ -293,8 +295,11 @@ async def on_ready():
 			try:
 				q.set(client.get_channel(vcch).guild.voice_client)
 				q.next()
-				await np()
-				await save()
+				try:
+					await np()
+					await save()
+				except:
+					await asyncio.sleep(1)
 			except:
 				await asyncio.sleep(1)
 		await asyncio.sleep(1)
