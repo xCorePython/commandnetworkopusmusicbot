@@ -23,7 +23,7 @@ ydl_opts = {
 }
 #-b:a 320000 
 FFMPEG_OPTIONS = {
-	'options': '-vn -af \"firequalizer=gain_entry=\'entry(0,4);entry(30,0.5);entry(50,-3);entry(7000,-3);entry(9000,1.5);entry(16000,9);entry(80000,9)\'\"',
+	'options': '-af \"firequalizer=gain_entry=\'entry(0,4);entry(30,0.5);entry(50,-3);entry(7000,-3);entry(9000,1.5);entry(16000,9);entry(80000,9)\'\"',
 }
 
 reverse = advancedtime.advancedtime().fetchtime
@@ -280,7 +280,6 @@ async def on_ready():
 		    conver(info)
 		print('Loaded queue')
 		first.append('Converted')
-	await client.get_channel(773053692629876757).send('[endless-play] started')
 	while sys_loop == 1:
 		if not client.get_channel(vcch).guild.voice_client.is_playing():
 			try:
@@ -379,4 +378,4 @@ async def on_message(message):
 		except:
 			await message.channel.send(':x: **Failed run command**')
 
-client.run(sys_token)
+client.run(sys_token3)
