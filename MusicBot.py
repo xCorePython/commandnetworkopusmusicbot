@@ -23,7 +23,7 @@ ydl_opts = {
 }
 #-b:a 320000 
 FFMPEG_OPTIONS = {
-	'options': '-af \"firequalizer=gain_entry=\'entry(0,6);entry(30,3);entry(50,-4);entry(7000,-4);entry(9000,10);entry(21000,10)\'\"',
+	'options': '-af \"firequalizer=gain_entry=\'entry(0,6);entry(30,3);entry(50,-4);entry(7000,-4);entry(9000,9);entry(21000,9)\'\"',
 }
 
 reverse = advancedtime.advancedtime().fetchtime
@@ -50,7 +50,10 @@ class Queue:
 	def set(self, value):
 		self._voice = value
 	def next(self):
-		self.stop()
+		try:
+			self.stop()
+		except:
+			print('Stop Failed : Not Playing')
 		if len(self.queue) == 1:
 			self._start = now_date('off', 9)
 			self._start2 = now_date('on', 9)
@@ -294,10 +297,7 @@ async def on_ready():
 				q.next()
 				try:
 					await np()
-					try:
-						await save()
-					except:
-						await asyncio.sleep(1)
+					await save()
 				except:
 					await asyncio.sleep(1)
 			except:
