@@ -292,14 +292,11 @@ async def on_ready():
 	await client.get_channel(773053692629876757).send('[endless-play] started')
 	while sys_loop == 1:
 		if not client.get_channel(vcch).guild.voice_client.is_playing():
+			q.set(client.get_channel(vcch).guild.voice_client)
+			q.next()
 			try:
-				q.set(client.get_channel(vcch).guild.voice_client)
-				q.next()
-				try:
-					await np()
-					await save()
-				except:
-					await asyncio.sleep(1)
+				await np()
+				await save()
 			except:
 				await asyncio.sleep(1)
 		await asyncio.sleep(1)
