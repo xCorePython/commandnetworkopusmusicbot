@@ -233,6 +233,7 @@ def dl(value):
 			else:
 				return info_dict
 		except:
+			import youtube_dl
 			print('Retrying... ({})'.format(str(n)))
 
 def search(value):
@@ -247,6 +248,7 @@ def search(value):
 				else:
 					return dl('https://youtu.be/{}'.format(info_dict['entries'][0]['id']))
 		except:
+			import youtube_dl
 			print('Retrying... ({})'.format(n))
 	return 'Failed'
 
@@ -293,8 +295,8 @@ async def on_ready():
 	while sys_loop == 1:
 		if not client.get_channel(vcch).guild.voice_client.is_playing():
 			q.set(client.get_channel(vcch).guild.voice_client)
-			q.next()
 			try:
+				q.next()
 				await np()
 				await save()
 			except:
