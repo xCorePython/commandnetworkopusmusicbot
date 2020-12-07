@@ -100,7 +100,7 @@ class Queue:
 	def setvolume(self, value):
 		self._volume = value
 	def play(self):
-		self._voice.play(discord.PCMVolumeTransformer(discord.FFmpegPCMAudio('{0}.mp3'.format(self.queue[0]['id']), **FFMPEG_OPTIONS), volume=self._volume))
+		self._voice.play(discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(self.queue[0]['path'], **FFMPEG_OPTIONS), volume=self._volume))
 		
 
 q = Queue()
@@ -217,17 +217,17 @@ async def create_queue(channelid):
 		return message.content
 
 def conv(info_dict):
-	title = info_dict['id'] + '.mp3'
 	url = 'https://www.320youtube.com/watch?v={}'.format(info_dict['id'])
 	result = requests.get(url).text
 	dllink = str(str(result).split('href=')[8])[1:].split('" rel')[0]
-	urllib.request.urlretrieve(dllink, title)
+	return dllink
+	
 
 def dl(value):
 	for n in range(1, 3):
 		try:
 			info_dict = youtube_dl.YoutubeDL(ydl_opts).extract_info(value, download=True, process=True)
-			conv(info_dict)
+			info_dict['path'] = conv(info_dict)
 			if not info_dict:
 				error = raiseerror
 			else:
@@ -261,7 +261,6 @@ def conver(info_dict):
 	if os.path.isfile('{}.m4a'.format(info_dict['id'])):
 		#convert = subprocess.run("ffmpeg -i {0}.m4a -af \"firequalizer=gain_entry=\'entry(0,4);entry(100,0.5);entry(250,0);entry(7000,0);entry(9000,1.5);entry(16000,9);entry(40000,9)\'\" -vn -b:a 320000 -c:a libopus -n {0}.opus".format(info_dict['id']), shell=True)
 		data = json.loads(subprocess.run("ffprobe -print_format json -show_streams  -show_format {}.m4a".format(info_dict['id']), stdout=subprocess.PIPE, shell=True).stdout)
-		info_dict['path'] = info_dict['id'] + '.mp3'
 		info_dict['format'] = data['format']
 		info_dict['streams'] = data['streams']
 		q.add(info_dict)
@@ -272,7 +271,6 @@ def conver(info_dict):
 		data = json.loads(subprocess.run("ffprobe -print_format json -show_streams  -show_format {}.webm".format(info_dict['id']), stdout=subprocess.PIPE, shell=True).stdout)
 		info_dict['format'] = data['format']
 		info_dict['streams'] = data['streams']
-		info_dict['path'] = info_dict['id'] + '.mp3'
 		q.add(info_dict)
 		return info_dict
 	except:
