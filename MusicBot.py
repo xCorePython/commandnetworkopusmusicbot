@@ -49,7 +49,7 @@ class Queue:
 		self.play()
 	def set(self, value):
 		self._voice = value
-	def next(self):
+	def next(self, error=None):
 		try:
 			self.stop()
 		except:
