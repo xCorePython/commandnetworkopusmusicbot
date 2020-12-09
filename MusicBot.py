@@ -23,7 +23,7 @@ ydl_opts = {
 }
 #-b:a 320000 
 FFMPEG_OPTIONS = {
-	'options': '-af \"firequalizer=gain_entry=\'entry(0,6);entry(30,3);entry(50,-4);entry(7000,-4);entry(9000,9);entry(21000,9)\'\"',
+	'options': '-vn -ac 2 -af \"firequalizer=gain_entry=\'entry(0,6);entry(30,3);entry(50,-4);entry(7000,-4);entry(9000,9);entry(21000,9)\'\"',
 }
 
 reverse = advancedtime.advancedtime().fetchtime
@@ -100,7 +100,7 @@ class Queue:
 	def setvolume(self, value):
 		self._volume = value
 	def play(self):
-		self._voice.play(discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(self.queue[0]['path'], **FFMPEG_OPTIONS), volume=self._volume))
+		self._voice.play(discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(dl(self.queue[0]), **FFMPEG_OPTIONS), volume=self._volume), after=q.next)
 		
 
 q = Queue()
@@ -209,7 +209,6 @@ async def commands(command, message):
 		await client.get_channel(vcch).connect()
 		q.set(client.get_channel(vcch).guild.voice_client)
 		q.start()
-		await np()
 
 async def create_queue(channelid):
 	messages = await client.get_channel(channelid).history(limit=1).flatten()
@@ -226,14 +225,13 @@ def conv(info_dict):
 def dl(value):
 	for n in range(1, 3):
 		try:
+			import youtube_dl
 			info_dict = youtube_dl.YoutubeDL(ydl_opts).extract_info(value, download=True, process=True)
-			info_dict['path'] = conv(info_dict)
 			if not info_dict:
 				error = raiseerror
 			else:
 				return info_dict
 		except:
-			import youtube_dl
 			print('Retrying... ({})'.format(str(n)))
 
 def search(value):
@@ -292,21 +290,16 @@ async def on_ready():
 	await client.get_channel(773053692629876757).send('[endless-play] started')
 	while sys_loop == 1:
 		try:
-			if not client.get_channel(vcch).guild.voice_client.is_playing():
-				q.set(client.get_channel(vcch).guild.voice_client)
-				q.next()
-				await np()
-				await save()
+			await np()
 		except:
-			await asyncio.sleep(1)
-		await asyncio.sleep(1)
+			await asyncio.sleep(2)
+		await asyncio.sleep(2)
 
 @client.event
 async def on_message(message):
 	if message.channel.id == 773053692629876757:
 		if message.content == '[endless-play] started':
 			await commands('start', message)
-			await np()
 	if message.content.startswith(command_prefix):
 		prefix = message.content[len(command_prefix):]
 		start = prefix.split(' ')[0]
