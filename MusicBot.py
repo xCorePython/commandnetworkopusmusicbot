@@ -100,7 +100,7 @@ class Queue:
 	def setvolume(self, value):
 		self._volume = value
 	def play(self):
-		self._voice.play(discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(dl(self.queue[0]), **FFMPEG_OPTIONS), volume=self._volume), after=q.next)
+		self._voice.play(discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(str(dl(self.queue[0])), **FFMPEG_OPTIONS), volume=self._volume), after=q.next)
 		
 
 q = Queue()
