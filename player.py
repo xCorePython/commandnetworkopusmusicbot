@@ -7,10 +7,12 @@ class Queue:
 		self._volume = 0.1
 		self.skipped = False
 		self.options = {
-			'options': '-vn -af \"firequalizer=gain_entry=\'entry(0,6);entry(30,3);entry(50,-4);entry(7000,-4);entry(9000,9);entry(21000,9)\'\"',
+			'options': '-vn -af \"firequalizer=gain_entry=\'entry(0,6);entry(30,3);entry(50,-5);entry(5000,-5);entry(6000, -2.5);entry(9000,9);entry(22000,9)\'\"',
 		}
 	def add(self, value):
 		self.queue.append(value)
+	def seteq(self, value):		
+		self.options = value
 	def remove(self, value):
 		try:
 			del self.queue[int(value)]
