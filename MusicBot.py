@@ -21,7 +21,7 @@ ydl_opts = {
 	'noplaylist': True,
 	'quiet': True,
 	'no-overwrite': True,
-	'keep-video': True,
+	'k': True,
 	'postprocessors': [{
 		'key': 'FFmpegExtractAudio',
 		'preferredcodec': 'mp3',
