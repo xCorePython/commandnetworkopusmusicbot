@@ -21,29 +21,29 @@ ydl_opts = {
 	'noplaylist': True,
 	'quiet': True,
 	'no-overwrite': True,
-	'k': True,
-	'postprocessors': [{
-		'key': 'FFmpegExtractAudio',
-		'preferredcodec': 'mp3',
-		'preferredquality': '192'},
-		{'key': 'FFmpegMetadata'},],
+#	'k': True,
+#	'postprocessors': [{
+#		'key': 'FFmpegExtractAudio',
+#		'preferredcodec': 'mp3',
+#		'preferredquality': '192'},
+#		{'key': 'FFmpegMetadata'},],
 }
 
 def finalize(info_dict):
 	try:
 		if os.path.isfile('{}.m4a'.format(info_dict['id'])):
-			convert = subprocess.run("ffmpeg -i {0}.m4a -af \"firequalizer=gain_entry=\'entry(0,4);entry(100,0.5);entry(250,0);entry(7000,0);entry(9000,1.5);entry(16000,9);entry(40000,9)\'\" -vn -b:a 192000 -c:a libmp3lame -n {0}.mp3".format(info_dict['id']), shell=True)
-			data = json.loads(subprocess.run("ffprobe -print_format json -show_streams  -show_format {}.mp3".format(info_dict['id']), stdout=subprocess.PIPE, shell=True).stdout)
+			#convert = subprocess.run("ffmpeg -i {0}.m4a -af \"firequalizer=gain_entry=\'entry(0,4);entry(100,0.5);entry(250,0);entry(7000,0);entry(9000,1.5);entry(16000,9);entry(40000,9)\'\" -vn -b:a 192000 -c:a libmp3lame -n {0}.mp3".format(info_dict['id']), shell=True)
+			data = json.loads(subprocess.run("ffprobe -print_format json -show_streams  -show_format {}.m4a".format(info_dict['id']), stdout=subprocess.PIPE, shell=True).stdout)
 			info_dict['format'] = data['format']
 			info_dict['streams'] = data['streams']
-			info_dict['path'] = info_dict['id'] + '.mp3'
+			info_dict['path'] = info_dict['id'] + '.m4a'
 			q.add(info_dict)
 			return info_dict
 		else:
-			data = json.loads(subprocess.run("ffprobe -print_format json -show_streams  -show_format {}.mp3".format(info_dict['id']), stdout=subprocess.PIPE, shell=True).stdout)
+			data = json.loads(subprocess.run("ffprobe -print_format json -show_streams  -show_format {}.webm".format(info_dict['id']), stdout=subprocess.PIPE, shell=True).stdout)
 			info_dict['format'] = data['format']
 			info_dict['streams'] = data['streams']
-			info_dict['path'] = info_dict['id'] + '.mp3'
+			info_dict['path'] = info_dict['id'] + '.webm'
 			q.add(info_dict)
 			return info_dict
 	except:
