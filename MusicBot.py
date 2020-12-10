@@ -37,14 +37,12 @@ def finalize(info_dict):
 			info_dict['format'] = data['format']
 			info_dict['streams'] = data['streams']
 			info_dict['path'] = info_dict['id'] + '.m4a'
-			q.add(info_dict)
 			return info_dict
 		else:
 			data = json.loads(subprocess.run("ffprobe -print_format json -show_streams  -show_format {}.webm".format(info_dict['id']), stdout=subprocess.PIPE, shell=True).stdout)
 			info_dict['format'] = data['format']
 			info_dict['streams'] = data['streams']
 			info_dict['path'] = info_dict['id'] + '.webm'
-			q.add(info_dict)
 			return info_dict
 	except:
 		return 'Failed'
@@ -63,11 +61,15 @@ def download(value):
 				else:
 					info_dict =  youtube_dl.YoutubeDL(self.ydl_opts).extract_info('https://youtu.be/{}'.format(info_dict['entries'][0]['id']), download=True, process=True)
 					finalize(info_dict)
+			if info_dict == 'Failed':
+				error = raiseerror
+			q.add(info_dict)
+			return info_dict
 		except:
 			print('Retrying... ({})'.format(n))
 	return 'Failed'
 
-async def save(self):
+async def save():
 	messages = await client.get_channel(queuech).history(limit=1).flatten()
 	queues = []
 	for n in range(len(q.np1())):
@@ -99,18 +101,14 @@ async def commands(command, message):
 		sendms.add_field(name='Volume', value='{}%'.format(str(int(float(client.get_channel(vcch).guild.voice_client.source.volume)*100))), inline=False)
 		sendms.add_field(name='Equalizer', value='Bass: x5.0 Truble: x9.0')
 		sendms.set_thumbnail(url=str(info['thumbnails'][len(info['thumbnails']) - 1]['url']))
-		sendms.set_footer(text='Started at {} | High Quality Technology from FFmpeg | FireEqualizer from FFmpeg'.format(start2))
+		sendms.set_footer(text='Started at {} | FireEqualizer from FFmpeg'.format(start2))
 		await message.channel.send(embed=sendms)
 	elif command == 'play':
 		editms = await message.channel.send(':arrows_counterclockwise: **Searching...**')
-		info = search(' '.join(arg))
+		info = download(' '.join(arg))
 		if info == 'Failed':
 			await message.channel.send(':x: **No result**')
 		else:
-			info = conver(info)
-			if info == 'Failed':
-				await editms.edit(content=':x: **Download Failed**')
-				return
 			sendms = discord.Embed(title='Successfully Added')
 			link = 'https://youtu.be/' + info['id']
 			sendms.add_field(name='Title', value='[{}]({})'.format(info['title'], link), inline=False)
@@ -118,10 +116,8 @@ async def commands(command, message):
 			sendms.add_field(name='Duration', value=reverse(info['duration']))
 			sendms.add_field(name='Codec', value=info['streams'][0]['codec_long_name'], inline=False)
 			sendms.add_field(name='Bitrate', value='{}kbps / {}'.format(str(int(info['format']['bit_rate'])/1000),  info['streams'][0]['channel_layout']), inline=False)
-			sendms.add_field(name='Volume', value='{}%'.format(str(int(float(client.get_channel(vcch).guild.voice_client.source.volume)*100))), inline=False)
-			sendms.add_field(name='Equalizer', value='Bass: x5.0 Truble: x9.0')
 			sendms.set_thumbnail(url=str(info['thumbnails'][len(info['thumbnails']) - 1]['url']))
-			sendms.set_footer(text='Extracted from {} | High Quality Technology from FFmpeg | FireEqualizer from FFmpeg'.format(info['extractor']))
+			sendms.set_footer(text='Extracted from {} | FireEqualizer from FFmpeg'.format(info['extractor']))
 			await editms.edit(content=None, embed=sendms)
 	elif command == 'skip':
 		arg = message.content.split(' ')
