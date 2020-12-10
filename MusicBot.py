@@ -59,7 +59,7 @@ def download(value):
 				if not info_dict:
 					error = raiseerror
 				else:
-					info_dict =  youtube_dl.YoutubeDL(self.ydl_opts).extract_info('https://youtu.be/{}'.format(info_dict['entries'][0]['id']), download=True, process=True)
+					info_dict =  youtube_dl.YoutubeDL(ydl_opts).extract_info('https://youtu.be/{}'.format(info_dict['entries'][0]['id']), download=True, process=True)
 					finalize(info_dict)
 			if info_dict == 'Failed':
 				error = raiseerror
