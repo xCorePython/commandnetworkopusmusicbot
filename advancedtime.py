@@ -26,7 +26,7 @@ def checkmonth(mode):
 def checktime(mode, location):
 	if mode == 'off':
 		now = datetime.datetime.utcnow()
-		return float(now.strftime("0.%f")) + int(now.second) + int(int(int(now.month * 365) + int(self.checkmonth('month'))) * 86400) + int(int(now.day) * 86400) + int(int(now.hour) * 3600) + int(int(now.minute) * 60)
+		return float(now.strftime("0.%f")) + int(now.second) + int(int(int(now.month * 365) + int(checkmonth('month'))) * 86400) + int(int(now.day) * 86400) + int(int(now.hour) * 3600) + int(int(now.minute) * 60)
 	if mode == 'on':
 		now = datetime.datetime.utcnow()
 		locationtime = location
