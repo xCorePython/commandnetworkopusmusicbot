@@ -35,12 +35,14 @@ def finalize(info_dict):
 			data = json.loads(subprocess.run("ffprobe -print_format json -show_streams  -show_format {}.m4a".format(info_dict['id']), stdout=subprocess.PIPE, shell=True).stdout)
 			info_dict['format'] = data['format']
 			info_dict['streams'] = data['streams']
+			info_dict['path'] = info_dict['id'] + '.mp3'
 			q.add(info_dict)
 			return info_dict
 		else:
 			data = json.loads(subprocess.run("ffprobe -print_format json -show_streams  -show_format {}.webm".format(info_dict['id']), stdout=subprocess.PIPE, shell=True).stdout)
 			info_dict['format'] = data['format']
 			info_dict['streams'] = data['streams']
+			info_dict['path'] = info_dict['id'] + '.mp3'
 			q.add(info_dict)
 			return info_dict
 	except:
@@ -104,7 +106,7 @@ async def commands(command, message):
 		if info == 'Failed':
 			await message.channel.send(':x: **No result**')
 		else:
-			info = download(info)
+			info = conver(info)
 			if info == 'Failed':
 				await editms.edit(content=':x: **Download Failed**')
 				return
@@ -187,7 +189,7 @@ async def on_ready():
 		links = str(await create_queue(774525604116037662)).split('\n')
 		for n in range(len(links)):
 		    info = search(links[n])
-		    download(info)
+		    conver(info)
 		print('Loaded queue')
 		first.append('Converted')
 	await client.get_channel(773053692629876757).send('[endless-play] started')
