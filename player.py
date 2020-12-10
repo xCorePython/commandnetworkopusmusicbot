@@ -1,10 +1,11 @@
-import youtube_dl, requests, discord, json
+import youtube_dl, requests, discord, json, advancedtime
 
 class Queue:
 	def __init__(self):
 		self.queue = []
 		self._volume = 0.1
 		self.skipped = False
+		now_date = advancedtime.checktime
 		self.options = {
 			'options': '-vn -af \"firequalizer=gain_entry=\'entry(0,6);entry(30,3);entry(50,-4);entry(7000,-4);entry(9000,9);entry(21000,9)\'\"',
 		}
