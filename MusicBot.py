@@ -155,10 +155,10 @@ async def commands(command, message):
 	elif command == 'queue':
 		queue = q.np1()
 		queues = []
+		queues.append('**Now Playing : [{}](https://youtu.be/{})'.format(queue[0]['title'], queue[0]['id']))
 		for n in range(1, len(queue)):
-			queues.append('{}: {}'.format(n, queue[n]['title']))
+			queues.append('{}: [{}](https://youtu.be/{})'.format(n, queue[n]['title'], queue[n]['id']))
 		sendms = discord.Embed(title='Queue', description='\n'.join(queues))
-		sendms.add_field(name='Now Playing', value=queue[0]['title'])
 		await message.channel.send(embed=sendms)
 	elif command == 'leave':
 		await client.get_channel(vcch).guild.voice_client.disconnect()
