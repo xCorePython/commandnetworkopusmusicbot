@@ -1,4 +1,4 @@
-import discord, youtube_dl, subprocess, calendar, datetime, asyncio, json, os, advancedtime, urllib, requests
+import discord, youtube_dl, subprocess, calendar, datetime, asyncio, json, os, advancedtime, requests, player
 
 sys_token = 'NzYxOTI5NDgxNDIxOTc5NjY5.X3hwIA.ItlW0Q2Fej-OyNdbfUKO2czZQvk'
 sys_token2 = 'NzYwNDkwNjYwNDQzODQ4NzM0.X3M0Hg.lTDx_AvmNNr1spqwUo1wqetaVlM'
@@ -8,120 +8,72 @@ command_prefix = 'c.'
 client = discord.Client()
 vcch = 734217960222228490
 #vcch = 584262828807028746
+queuech = 774525604116037662
+reverse = advancedtime.fetchtime
+now_date = advancedtime.checktime
+now_month = advancedtime.checkmonth		
+q = player.Queue()
+first = ['Not Converted']
 ydl_opts = {
-    'format': 'bestaudio/best',
-    'outtmpl': "%(id)s" + '.%(ext)s',
-    'ignoreerrors': True,
-    'noplaylist': True,
-    'quiet': True,
-    'no-overwrite': True,
-#	'postprocessors': [{
-#    	'key': 'FFmpegExtractAudio',
-#        'preferredcodec': 'mp3',
-#        'preferredquality': '320'},
-#    {'key': 'FFmpegMetadata'},],
-}
-#-b:a 320000 
-FFMPEG_OPTIONS = {
-	'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 1200',
-	'options': '-vn -ac 2 -af \"firequalizer=gain_entry=\'entry(0,6);entry(30,3);entry(50,-4);entry(7000,-4);entry(9000,9);entry(21000,9)\'\"',
+	'format': 'bestaudio/best',
+	'outtmpl': "%(id)s" + '.%(ext)s',
+	'ignoreerrors': True,
+	'noplaylist': True,
+	'quiet': True,
+	'no-overwrite': True,
+	'postprocessors': [{
+		'key': 'FFmpegExtractAudio',
+		'preferredcodec': 'mp3',
+		'preferredquality': '192'},
+		{'key': 'FFmpegMetadata'},],
 }
 
-reverse = advancedtime.advancedtime().fetchtime
-now_date = advancedtime.advancedtime().checktime
-now_month = advancedtime.advancedtime().checkmonth
-
-class Queue:
-	def __init__(self):
-		self.queue = []
-		self._volume = 0.1
-		self.skipped = False
-
-	def add(self, value):
-		self.queue.append(value)
-	def remove(self, value):
-		try:
-			del self.queue[int(value)]
-			return 'Done'
-		except:
-			return 'Failed'
-	def start(self):
-		self._start = now_date('off', 9)
-		self._start2 = now_date('on', 9)
-		self.play()
-	def set(self, value):
-		self._voice = value
-	def next(self, error):
-		try:
-			self.stop()
-		except:
-			print('Stop Failed : Not Playing')
-		if self.skipped == True:
-			self._start = now_date('off', 9)
-			self._start2 = now_date('on', 9)
-			self.skipped = False
-			self.play()
-			return
-		if len(self.queue) == 1:
-			self._start = now_date('off', 9)
-			self._start2 = now_date('on', 9)
-			self.play()
-			return
-		self.played = self.queue[0]
-		self.queue = self.queue[1:]
-		self.queue.append(self.played)
-		self._start = now_date('off', 9)
-		self._start2 = now_date('on', 9)
-		self.play()
-	def np1(self):
-		return self.queue
-	def np2(self):
-	    return self._start
-	def np3(self):
-		return self._start2
-	def nvol(self):
-		return self._volume
-	def skip(self, value):
-		self.skipped = True
-		if len(self.queue) == 1:
-			self._start = now_date('off', 9)
-			self._start2 = now_date('on', 9)
-			self.stop()
-		if value == 1:
-			self.played = self.queue[0]
-			self.queue = self.queue[1:]
-			self._start = now_date('off', 9)
-			self._start2 = now_date('on', 9)
-			self.queue.append(self.played)
-			self.stop()
+def finalize(info_dict):
+	try:
+		if os.path.isfile('{}.m4a'.format(info_dict['id'])):
+			convert = subprocess.run("ffmpeg -i {0}.m4a -af \"firequalizer=gain_entry=\'entry(0,4);entry(100,0.5);entry(250,0);entry(7000,0);entry(9000,1.5);entry(16000,9);entry(40000,9)\'\" -vn -b:a 192000 -c:a libmp3lame -n {0}.mp3".format(info_dict['id']), shell=True)
+			data = json.loads(subprocess.run("ffprobe -print_format json -show_streams  -show_format {}.m4a".format(info_dict['id']), stdout=subprocess.PIPE, shell=True).stdout)
+			info_dict['format'] = data['format']
+			info_dict['streams'] = data['streams']
+			q.add(info_dict)
+			return info_dict
 		else:
-			for n in range(value):
-				self.played = self.queue[0]
-				self.queue = self.queue[1:]
-				self.queue.append(self.played)
-			self._start = now_date('off', 9)
-			self._start2 = now_date('on', 9)
-			self.stop()
-	def stop(self):
-		self._voice.stop()
-	def setvolume(self, value):
-		self._volume = value
-	def play(self):
-		self._voice.play(discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(conv(self.queue[0]), **FFMPEG_OPTIONS), volume=self._volume), after=q.next)
-		
+			data = json.loads(subprocess.run("ffprobe -print_format json -show_streams  -show_format {}.webm".format(info_dict['id']), stdout=subprocess.PIPE, shell=True).stdout)
+			info_dict['format'] = data['format']
+			info_dict['streams'] = data['streams']
+			q.add(info_dict)
+			return info_dict
+	except:
+		return 'Failed'
+	
+def download(value):
+	for n in range(1, 3):
+		try:
+			import youtube_dl
+			if value.startswith('https://'):
+				info_dict = youtube_dl.YoutubeDL(ydl_opts).extract_info(value, download=True, process=True)
+				finalize(info_dict)
+			else:
+				info_dict = youtube_dl.YoutubeDL(ydl_opts).extract_info("ytsearch:{}".format(value), download=False, process=True)
+				if not info_dict:
+					error = raiseerror
+				else:
+					info_dict =  youtube_dl.YoutubeDL(self.ydl_opts).extract_info('https://youtu.be/{}'.format(info_dict['entries'][0]['id']), download=True, process=True)
+					finalize(info_dict)
+		except:
+			print('Retrying... ({})'.format(n))
+	return 'Failed'
 
-q = Queue()
-
-async def save():
-    messages = await client.get_channel(774525604116037662).history(limit=1).flatten()
-    queues = []
-    for n in range(len(q.np1())):
-    	queues.append('https://youtu.be/{}'.format(q.np1()[n]['id']))
-    for message in messages:
-    	try:
-    		await message.edit(content='\n'.join(queues))
-    	except:
-    		await message.channel.send(content='\n'.join(queues))
+async def save(self):
+	messages = await client.get_channel(queuech).history(limit=1).flatten()
+	queues = []
+	for n in range(len(q.np1())):
+	    queues.append('https://youtu.be/{}'.format(q.np1()[n]['id']))
+	for message in messages:
+	    try:
+	    	await message.edit(content='\n'.join(queues))
+	    except:
+	    	await message.channel.send(content='\n'.join(queues))
 
 async def commands(command, message):
 	arg = message.content.split(' ')[1:]
@@ -152,7 +104,7 @@ async def commands(command, message):
 		if info == 'Failed':
 			await message.channel.send(':x: **No result**')
 		else:
-			info = conver(info)
+			info = download(info)
 			if info == 'Failed':
 				await editms.edit(content=':x: **Download Failed**')
 				return
@@ -222,66 +174,10 @@ async def create_queue(channelid):
 	for message in messages:
 		return message.content
 
-def conv(info_dict):
-	url = 'https://www.320youtube.com/watch?v={}'.format(info_dict['id'])
-	result = requests.get(url).text
-	dllink = str(str(result).split('href=')[8])[1:].split('" rel')[0]
-	return dllink
-	
-
-def dl(value):
-	for n in range(1, 3):
-		try:
-			import youtube_dl
-			info_dict = youtube_dl.YoutubeDL(ydl_opts).extract_info(value, download=True, process=True)
-			if not info_dict:
-				error = raiseerror
-			else:
-				return info_dict
-		except:
-			print('Retrying... ({})'.format(str(n)))
-
-def search(value):
-	for n in range(1, 3):
-		try:
-			if value.startswith('https://'):
-				return dl(value)
-			else:
-				info_dict = youtube_dl.YoutubeDL(ydl_opts).extract_info("ytsearch:{}".format(value), download=False, process=True)
-				if not info_dict:
-					error = raiseerror
-				else:
-					return dl('https://youtu.be/{}'.format(info_dict['entries'][0]['id']))
-		except:
-			import youtube_dl
-			print('Retrying... ({})'.format(n))
-	return 'Failed'
-
 async def np():
 	data = q.np1()[0]
 	duration = float(data['format']['duration'])
 	await client.get_channel(782863961153339403).edit(topic='Title: {}\nUploader : {}\nDuration : {}\nCodec : {}\nBitrate : {}kbps / {}'.format(data['title'], data['uploader'], str(reverse(duration)), data['streams'][0]['codec_long_name'], str(int(data['format']['bit_rate'])/1000), data['streams'][0]['channel_layout']))
-
-def conver(info_dict):
-	if os.path.isfile('{}.m4a'.format(info_dict['id'])):
-		#convert = subprocess.run("ffmpeg -i {0}.m4a -af \"firequalizer=gain_entry=\'entry(0,4);entry(100,0.5);entry(250,0);entry(7000,0);entry(9000,1.5);entry(16000,9);entry(40000,9)\'\" -vn -b:a 320000 -c:a libopus -n {0}.opus".format(info_dict['id']), shell=True)
-		data = json.loads(subprocess.run("ffprobe -print_format json -show_streams  -show_format {}.m4a".format(info_dict['id']), stdout=subprocess.PIPE, shell=True).stdout)
-		info_dict['format'] = data['format']
-		info_dict['streams'] = data['streams']
-		q.add(info_dict)
-		return info_dict
-	try:
-		#ffmpeg -y -i original.mp3 -af "firequalizer=gain_entry='entry(0,-23);entry(250,-11.5);entry(1000,0);entry(4000,8);entry(16000,16)'" test1.mp3
-		#convert = subprocess.run("ffmpeg -i {0}.webm -af \"firequalizer=gain_entry=\'entry(0,4);entry(100,0.5);entry(250,0);entry(7000,0);entry(9000,1.5);entry(16000,9);entry(40000,9)\'\" -vn -b:a 320000 -c:a libmp3lame -n {0}".format(info_dict['id']), shell=True)
-		data = json.loads(subprocess.run("ffprobe -print_format json -show_streams  -show_format {}.webm".format(info_dict['id']), stdout=subprocess.PIPE, shell=True).stdout)
-		info_dict['format'] = data['format']
-		info_dict['streams'] = data['streams']
-		q.add(info_dict)
-		return info_dict
-	except:
-		return 'Failed'
-
-first = ['Not Converted']
 
 @client.event
 async def on_ready():
@@ -291,7 +187,7 @@ async def on_ready():
 		links = str(await create_queue(774525604116037662)).split('\n')
 		for n in range(len(links)):
 		    info = search(links[n])
-		    conver(info)
+		    download(info)
 		print('Loaded queue')
 		first.append('Converted')
 	await client.get_channel(773053692629876757).send('[endless-play] started')
