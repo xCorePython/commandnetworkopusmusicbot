@@ -23,7 +23,7 @@ ydl_opts = {
 }
 #-b:a 320000 
 FFMPEG_OPTIONS = {
-	'before_options': '-reconnect 20 -reconnect_streamed 20 -reconnect_delay_max 1200',
+	'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 1200',
 	'options': '-vn -ac 2 -af \"firequalizer=gain_entry=\'entry(0,6);entry(30,3);entry(50,-4);entry(7000,-4);entry(9000,9);entry(21000,9)\'\"',
 }
 
