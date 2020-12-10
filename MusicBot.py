@@ -188,8 +188,7 @@ async def on_ready():
 		print('Loading queue...')
 		links = str(await create_queue(774525604116037662)).split('\n')
 		for n in range(len(links)):
-		    info = search(links[n])
-		    conver(info)
+		    download(info)
 		print('Loaded queue')
 		first.append('Converted')
 	await client.get_channel(773053692629876757).send('[endless-play] started')
