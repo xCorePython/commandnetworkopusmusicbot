@@ -23,6 +23,7 @@ ydl_opts = {
 }
 #-b:a 320000 
 FFMPEG_OPTIONS = {
+	'before_options': '-reconnect 1000 -reconnect_streamed 10 -reconnect_delay_max 12000',
 	'options': '-vn -ac 2 -af \"firequalizer=gain_entry=\'entry(0,6);entry(30,3);entry(50,-4);entry(7000,-4);entry(9000,9);entry(21000,9)\'\"',
 }
 
@@ -34,6 +35,7 @@ class Queue:
 	def __init__(self):
 		self.queue = []
 		self._volume = 0.1
+		self.skipped = False
 
 	def add(self, value):
 		self.queue.append(value)
@@ -49,15 +51,22 @@ class Queue:
 		self.play()
 	def set(self, value):
 		self._voice = value
-	def next(self, error=None):
+	def next(self):
 		try:
 			self.stop()
 		except:
 			print('Stop Failed : Not Playing')
+		if self.skipped == True:
+			self._start = now_date('off', 9)
+			self._start2 = now_date('on', 9)
+			self.skipped = False
+			self.play()
+			return
 		if len(self.queue) == 1:
 			self._start = now_date('off', 9)
 			self._start2 = now_date('on', 9)
 			self.play()
+			return
 		self.played = self.queue[0]
 		self.queue = self.queue[1:]
 		self.queue.append(self.played)
@@ -73,34 +82,32 @@ class Queue:
 	def nvol(self):
 		return self._volume
 	def skip(self, value):
+		self.skipped = True
 		if len(self.queue) == 1:
-			self.stop()
 			self._start = now_date('off', 9)
 			self._start2 = now_date('on', 9)
-			self.play()
+			self.stop()
 		if value == 1:
 			self.played = self.queue[0]
 			self.queue = self.queue[1:]
-			self.queue.append(self.played)
-			self.stop()
 			self._start = now_date('off', 9)
 			self._start2 = now_date('on', 9)
-			self.play()
+			self.queue.append(self.played)
+			self.stop()
 		else:
 			for n in range(value):
 				self.played = self.queue[0]
 				self.queue = self.queue[1:]
 				self.queue.append(self.played)
-			self.stop()
 			self._start = now_date('off', 9)
 			self._start2 = now_date('on', 9)
-			self.play()
+			self.stop()
 	def stop(self):
 		self._voice.stop()
 	def setvolume(self, value):
 		self._volume = value
 	def play(self):
-		self._voice.play(discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(str(conv(self.queue[0])), **FFMPEG_OPTIONS), volume=self._volume), after=q.next)
+		self._voice.play(discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(conv(self.queue[0]), **FFMPEG_OPTIONS), volume=self._volume), after=q.next)
 		
 
 q = Queue()
