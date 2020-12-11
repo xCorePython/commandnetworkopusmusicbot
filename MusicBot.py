@@ -55,12 +55,12 @@ def download(value):
 				info_dict = youtube_dl.YoutubeDL(ydl_opts).extract_info(value, download=True, process=True)
 				finalize(info_dict)
 			else:
-				info_dict = youtube_dl.YoutubeDL(ydl_opts).extract_info("ytsearch:{}".format(value), download=False, process=True)
-				if not info_dict:
+				search = youtube_dl.YoutubeDL(ydl_opts).extract_info("ytsearch:{}".format(value), download=False, process=True)
+				if not search:
 					error = raiseerror
 				else:
-					info_dict =  youtube_dl.YoutubeDL(ydl_opts).extract_info('https://youtu.be/{}'.format(info_dict['entries'][0]['id']), download=True, process=True)
-					finalize(info_dict)
+					download  =  youtube_dl.YoutubeDL(ydl_opts).extract_info('https://youtu.be/{}'.format(search['entries'][0]['id']), download=True, process=True)
+					info_dict = finalize(download)
 			if info_dict == 'Failed':
 				error = raiseerror
 			q.add(info_dict)
@@ -155,7 +155,7 @@ async def commands(command, message):
 	elif command == 'queue':
 		queue = q.np1()
 		queues = []
-		queues.append('**Now Playing : [{}](https://youtu.be/{})'.format(queue[0]['title'], queue[0]['id']))
+		queues.append('**Now Playing : [{}](https://youtu.be/{})**'.format(queue[0]['title'], queue[0]['id']))
 		for n in range(1, len(queue)):
 			queues.append('{}: [{}](https://youtu.be/{})'.format(n, queue[n]['title'], queue[n]['id']))
 		sendms = discord.Embed(title='Queue', description='\n'.join(queues))
