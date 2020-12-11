@@ -31,19 +31,19 @@ def checktime(mode, location):
 		now = datetime.datetime.utcnow()
 		locationtime = location
 		year = now.year
-		hour = now.hour + locationtime
+		hour = now.hour + int(locationtime)
 		day = now.day
 		month = now.month
 		if hour > 24:
 			hour2 = hour / 24
-			hour = hour - int(hour2 * 24)
+			hour = int(hour - int(hour2 * 24))
 			day = day + 1
 			if day > self.checkmonth('month'):
 				month = month + 1
 				if month > 12:
 					month = month - 12
 					year = year + 1
-		a01 = datetime.datetime(year, month, day, hour, now.minute, now.second, int(now.strftime("%f")))
+		a01 = datetime.datetime(year, month, day, int(hour), now.minute, now.second, int(now.strftime("%f")))
 		return a01.strftime("%Y/%m/%d %H:%M:%S.%f")
 
 def fetchtime(data):
