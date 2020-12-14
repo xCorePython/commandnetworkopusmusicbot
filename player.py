@@ -1,4 +1,4 @@
-import youtube_dl, requests, discord, json, advancedtime
+import discord, advancedtime, random.shuffle
 now_date = advancedtime.checktime
 
 class Queue:
@@ -11,8 +11,14 @@ class Queue:
 		}
 	def add(self, value):
 		self.queue.append(value)
+		try:
+			self.start()
+		except:
+			self.np = True
 	def seteq(self, value):		
 		self.options = value
+	def shuffle(self):
+		random.shuffle(self.queue)
 	def remove(self, value):
 		try:
 			del self.queue[int(value)]
@@ -20,12 +26,18 @@ class Queue:
 		except:
 			return 'Failed'
 	def start(self):
+		if not self.queue:
+			return
 		self._start = now_date('off', 9)
 		self._start2 = now_date('on', 9)
 		self.play()
 	def set(self, value):
 		self._voice = value
+	def clear(self):
+		self.queue.clear()
 	def next(self, error):
+		if not self.queue:
+			return
 		try:
 			self.stop()
 		except:
@@ -56,6 +68,8 @@ class Queue:
 	def nvol(self):
 		return self._volume
 	def skip(self, value):
+		if not self.queue:
+			return
 		self.skipped = True
 		if len(self.queue) == 1:
 			self._start = now_date('off', 9)
