@@ -1,4 +1,4 @@
-import discord, advancedtime, random.shuffle
+import discord, advancedtime, random
 now_date = advancedtime.checktime
 
 class Queue:
