@@ -38,6 +38,8 @@ class Queue:
 	def next(self, error):
 		if not self.queue:
 			return
+		if not voice:
+			return
 		try:
 			self.stop()
 		except:
