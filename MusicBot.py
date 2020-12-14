@@ -11,9 +11,12 @@ vcch = 734217960222228490
 queuech = 774525604116037662
 reverse = advancedtime.fetchtime
 now_date = advancedtime.checktime
-now_month = advancedtime.checkmonth		
+now_month = advancedtime.checkmonth
+color1 = 0x377EF0
+color2 = 0xF8C63D
 q = player.Queue()
 first = ['Not Converted']
+playlist = {}
 ydl_opts = {
 	'format': 'bestaudio/best',
 	'outtmpl': "%(id)s" + '.%(ext)s',
@@ -21,64 +24,7 @@ ydl_opts = {
 	'noplaylist': True,
 	'quiet': True,
 	'no-overwrite': True,
-#	'k': True,
-#	'postprocessors': [{
-#		'key': 'FFmpegExtractAudio',
-#		'preferredcodec': 'mp3',
-#		'preferredquality': '192'},
-#		{'key': 'FFmpegMetadata'},],
 }
-
-def finalize(info_dict):
-	try:
-		if os.path.isfile('{}.m4a'.format(info_dict['id'])):
-			#convert = subprocess.run("ffmpeg -i {0}.m4a -af \"firequalizer=gain_entry=\'entry(0,4);entry(100,0.5);entry(250,0);entry(7000,0);entry(9000,1.5);entry(16000,9);entry(40000,9)\'\" -vn -b:a 192000 -c:a libmp3lame -n {0}.mp3".format(info_dict['id']), shell=True)
-			data = json.loads(subprocess.run("ffprobe -print_format json -show_streams  -show_format {}.m4a".format(info_dict['id']), stdout=subprocess.PIPE, shell=True).stdout)
-			info_dict['format'] = data['format']
-			info_dict['streams'] = data['streams']
-			info_dict['path'] = info_dict['id'] + '.m4a'
-			return info_dict
-		else:
-			data = json.loads(subprocess.run("ffprobe -print_format json -show_streams  -show_format {}.webm".format(info_dict['id']), stdout=subprocess.PIPE, shell=True).stdout)
-			info_dict['format'] = data['format']
-			info_dict['streams'] = data['streams']
-			info_dict['path'] = info_dict['id'] + '.webm'
-			return info_dict
-	except:
-		return 'Failed'
-	
-def download(value):
-	for n in range(1, 3):
-		try:
-			import youtube_dl
-			if value.startswith('https://'):
-				info_dict = youtube_dl.YoutubeDL(ydl_opts).extract_info(value, download=True, process=True)
-				finalize(info_dict)
-			else:
-				search = youtube_dl.YoutubeDL(ydl_opts).extract_info("ytsearch:{}".format(value), download=False, process=True)
-				if not search:
-					error = raiseerror
-				else:
-					download  =  youtube_dl.YoutubeDL(ydl_opts).extract_info('https://youtu.be/{}'.format(search['entries'][0]['id']), download=True, process=True)
-					info_dict = finalize(download)
-			if info_dict == 'Failed':
-				error = raiseerror
-			q.add(info_dict)
-			return info_dict
-		except:
-			print('Retrying... ({})'.format(n))
-	return 'Failed'
-
-async def save():
-	messages = await client.get_channel(queuech).history(limit=1).flatten()
-	queues = []
-	for n in range(len(q.np1())):
-	    queues.append('https://youtu.be/{}'.format(q.np1()[n]['id']))
-	for message in messages:
-	    try:
-	    	await message.edit(content='\n'.join(queues))
-	    except:
-	    	await message.channel.send(content='\n'.join(queues))
 
 async def commands(command, message):
 	arg = message.content.split(' ')[1:]
@@ -87,7 +33,7 @@ async def commands(command, message):
 		start = q.np2()
 		start2 = q.np3()
 		link = 'https://youtu.be/' + info['id']
-		sendms = discord.Embed(title='Now Playing')
+		sendms = discord.Embed(title='Now Playing', colour=color1)
 		sendms.add_field(name='Title', value='[{}]({})'.format(info['title'], link), inline=False)
 		sendms.add_field(name='Uploader',value='[{}]({})'.format(info['uploader'],info['uploader_url']),inline=False)
 		nowti = now_date('off', 9)
@@ -109,7 +55,7 @@ async def commands(command, message):
 		if info == 'Failed':
 			await message.channel.send(':x: **No result**')
 		else:
-			sendms = discord.Embed(title='Successfully Added')
+			sendms = discord.Embed(title='Successfully Added', colour=color1)
 			link = 'https://youtu.be/' + info['id']
 			sendms.add_field(name='Title', value='[{}]({})'.format(info['title'], link), inline=False)
 			sendms.add_field(name='Uploader',value='[{}]({})'.format(info['uploader'],info['uploader_url']),inline=False)
@@ -133,7 +79,6 @@ async def commands(command, message):
 			else:
 				q.skip(int(arg[1]))
 				await message.channel.send(':fast_forward: **{} songs skipped**'.format(arg[1]))
-	
 	elif command == 'remove':
 		arg = message.content.split(' ')
 		info = q.remove(int(arg[1]))
@@ -144,7 +89,7 @@ async def commands(command, message):
 		await save()
 	elif command == 'join':
 	    await client.get_channel(vcch).connect()
-	    await message.channel.send(':white_check_mark: **Joined**')
+	    await message.add_reaction('✅')
 	elif command == 'volume':
 		if 0 <= int(arg[0]) <= 100:
 			client.get_channel(vcch).guild.voice_client.source.volume = float(int(arg[0])/100)
@@ -158,25 +103,26 @@ async def commands(command, message):
 		queues.append('**Now Playing : [{}](https://youtu.be/{})**'.format(queue[0]['title'], queue[0]['id']))
 		for n in range(1, len(queue)):
 			queues.append('{}: [{}](https://youtu.be/{})'.format(n, queue[n]['title'], queue[n]['id']))
-		sendms = discord.Embed(title='Queue', description='\n'.join(queues))
+		sendms = discord.Embed(title='Queue', description='\n'.join(queues), colour=color2)
 		await message.channel.send(embed=sendms)
 	elif command == 'leave':
 		await client.get_channel(vcch).guild.voice_client.disconnect()
-		await message.channel.send(':white_check_mark: **Disconnected**')
-	elif command == 'start':
-		await client.get_channel(vcch).connect()
-		q.set(client.get_channel(vcch).guild.voice_client)
-		q.start()
-
-async def create_queue(channelid):
-	messages = await client.get_channel(channelid).history(limit=1).flatten()
-	for message in messages:
-		return message.content
-
-async def np():
-	data = q.np1()[0]
-	duration = float(data['format']['duration'])
-	await client.get_channel(782863961153339403).edit(topic='Title: {}\nUploader : {}\nDuration : {}\nCodec : {}\nBitrate : {}kbps / {}'.format(data['title'], data['uploader'], str(reverse(duration)), data['streams'][0]['codec_long_name'], str(int(data['format']['bit_rate'])/1000), data['streams'][0]['channel_layout']))
+		await message.add_reaction('✅')
+	elif command == 'playlist':
+		try:
+			chid = await str(arg[1])
+			try:
+				if arg[2].startswith('clear'):
+					q.clear()
+					links = str(await create_queue(chid)).split('\n')
+			except:
+				links = str(await create_queue(chid)).split('\n')
+			for n in range(len(links)):
+				download(links[n])
+		except:
+			await message.channel.send('Sorry. Playlist {} can\'t found'.format(arg[1]))
+	elif command == 'clear':
+		q.clear()
 
 @client.event
 async def on_ready():
@@ -188,7 +134,12 @@ async def on_ready():
 		    download(links[n])
 		print('Loaded queue')
 		first.append('Converted')
-	await client.get_channel(773053692629876757).send('[endless-play] started')
+	try:
+		await client.get_channel(vcch).connect(reconnect=10)
+		q.set(client.get_channel(vcch).guild.voice_client)
+	except:
+		q.set(client.get_channel(vcch).guild.voice_client)
+	q.start()
 	while sys_loop == 1:
 		try:
 			await np()
@@ -198,9 +149,6 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
-	if message.channel.id == 773053692629876757:
-		if message.content == '[endless-play] started':
-			await commands('start', message)
 	if message.content.startswith(command_prefix):
 		prefix = message.content[len(command_prefix):]
 		start = prefix.split(' ')[0]
@@ -282,5 +230,79 @@ async def on_message(message):
 				return
 		except:
 			await message.channel.send(':x: **Failed run command**')
+
+async def create_queue(channelid):
+	messages = await client.get_channel(channelid).history(limit=1).flatten()
+	for message in messages:
+		return message.content
+
+async def np():
+	data = q.np1()[0]
+	duration = float(data['format']['duration'])
+	await client.get_channel(782863961153339403).edit(topic='Title: {}\nUploader : {}\nDuration : {}\nCodec : {}\nBitrate : {}kbps / {}'.format(data['title'], data['uploader'], str(reverse(duration)), data['streams'][0]['codec_long_name'], str(int(data['format']['bit_rate'])/1000), data['streams'][0]['channel_layout']))
+
+def finalize(info_dict):
+	try:
+		if os.path.isfile('{}.m4a'.format(info_dict['id'])):
+			#convert = subprocess.run("ffmpeg -i {0}.m4a -af \"firequalizer=gain_entry=\'entry(0,4);entry(100,0.5);entry(250,0);entry(7000,0);entry(9000,1.5);entry(16000,9);entry(40000,9)\'\" -vn -b:a 192000 -c:a libmp3lame -n {0}.mp3".format(info_dict['id']), shell=True)
+			data = json.loads(subprocess.run("ffprobe -i {}.m4a -print_format json -show_streams  -show_format -loglevel quiet".format(info_dict['id']), stdout=subprocess.PIPE, shell=True).stdout)
+			info_dict['format'] = data['format']
+			info_dict['streams'] = data['streams']
+			info_dict['path'] = info_dict['id'] + '.m4a'
+			return info_dict
+		else:
+			data = json.loads(subprocess.run("ffprobe -i {}.webm -print_format json -show_streams  -show_format -loglevel quiet".format(info_dict['id']), stdout=subprocess.PIPE, shell=True).stdout)
+			info_dict['format'] = data['format']
+			info_dict['streams'] = data['streams']
+			info_dict['path'] = info_dict['id'] + '.webm'
+			return info_dict
+	except:
+		return 'Failed'
+	
+def download(value):
+	for n in range(1, 3):
+		try:
+			import youtube_dl
+			if value.startswith('https://'):
+				info_dict = youtube_dl.YoutubeDL(ydl_opts).extract_info(value, download=True, process=True)
+				finalize(info_dict)
+			else:
+				search = youtube_dl.YoutubeDL(ydl_opts).extract_info("ytsearch:{}".format(value), download=False, process=True)
+				if not search:
+					error = raiseerror
+				else:
+					download  =  youtube_dl.YoutubeDL(ydl_opts).extract_info('https://youtu.be/{}'.format(search['entries'][0]['id']), download=True, process=True)
+					info_dict = finalize(download)
+			if info_dict == 'Failed':
+				error = raiseerror
+			q.add(info_dict)
+			return info_dict
+		except:
+			print('Retrying... ({})'.format(n))
+	return 'Failed'
+
+async def save():
+	messages = await client.get_channel(queuech).history(limit=1).flatten()
+	queues = []
+	for n in range(len(q.np1())):
+	    queues.append('https://youtu.be/{}'.format(q.np1()[n]['id']))
+	for message in messages:
+	    try:
+	    	await message.edit(content='\n'.join(queues))
+	    except:
+	    	await message.channel.send(content='\n'.join(queues))
+
+async def loadqueue():
+	messages = await client.get_channel(787261880589746177).history(limit=1).flatten()
+	for message in messages:
+		return message.content
+
+async def savequeue(value):
+	messages = await client.get_channel(787261880589746177).history(limit=1).flatten()
+	for message in messages:
+	    try:
+	    	await message.edit(content=value)
+	    except:
+	    	await message.channel.send(value)
 
 client.run(sys_token)
