@@ -65,6 +65,7 @@ async def commands(command, message):
 			sendms.set_thumbnail(url=str(info['thumbnails'][len(info['thumbnails']) - 1]['url']))
 			sendms.set_footer(text='Extracted from {} | FireEqualizer from FFmpeg'.format(info['extractor']))
 			await editms.edit(content=None, embed=sendms)
+			await save()
 	elif command == 'skip':
 		arg = message.content.split(' ')
 		if len(arg) == 1:
