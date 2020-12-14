@@ -35,7 +35,7 @@ def checktime(mode, location):
 		day = now.day
 		month = now.month
 		if hour > 24:
-			hour2 = hour / 24
+			hour2 = int(hour / 24)
 			hour = int(hour - int(hour2 * 24))
 			day = day + 1
 			if day > checkmonth('month'):
