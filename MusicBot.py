@@ -90,6 +90,7 @@ async def commands(command, message):
 	elif command == 'join':
 	    await client.get_channel(vcch).connect()
 	    await message.add_reaction('✅')
+	    q.start()
 	elif command == 'volume':
 		if 0 <= int(arg[0]) <= 100:
 			client.get_channel(vcch).guild.voice_client.source.volume = float(int(arg[0])/100)
@@ -156,6 +157,15 @@ async def on_message(message):
 		try:
 			if start == 'start':
 				await commands('start', message)
+			if start == 'clear':
+				await commands('clear', message)
+				return
+			if start == 'c':
+				await commands('clear', message)
+				return
+			if start == 'cl':
+				await commands('clear', message)
+				return
 			if start == 'volume':
 				await commands('volume', message)
 				return
