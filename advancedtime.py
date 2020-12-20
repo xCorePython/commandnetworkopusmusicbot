@@ -29,14 +29,12 @@ def checktime(mode, location):
 		return float(now.strftime("0.%f")) + int(now.second) + int(int(int(now.month * 365) + int(checkmonth('month'))) * 86400) + int(int(now.day) * 86400) + int(int(now.hour) * 3600) + int(int(now.minute) * 60)
 	if mode == 'on':
 		now = datetime.datetime.utcnow()
-		locationtime = location
 		year = now.year
-		hour = now.hour + int(locationtime)
+		hour = now.hour + int(location)
 		day = now.day
 		month = now.month
-		if hour > 24:
-			hour2 = int(hour / 24)
-			hour = int(hour - int(hour2 * 24))
+		if hour >= 24:
+			hour = int(hour - int(int(hour / 24) * 24))
 			day = day + 1
 			if day > checkmonth('month'):
 				month = month + 1
