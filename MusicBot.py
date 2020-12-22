@@ -1,4 +1,4 @@
-import discord, youtube_dl, subprocess, datetime, json, advancedtime, player
+import discord, youtube_dl, subprocess, datetime, json, advancedtime, player, os
 
 sys_token = 'NzYxOTI5NDgxNDIxOTc5NjY5.X3hwIA.ItlW0Q2Fej-OyNdbfUKO2czZQvk'
 sys_token2 = 'NzYwNDkwNjYwNDQzODQ4NzM0.X3M0Hg.lTDx_AvmNNr1spqwUo1wqetaVlM'
@@ -65,6 +65,7 @@ async def commands(command, message):
 			sendms.set_thumbnail(url=str(info['thumbnails'][len(info['thumbnails']) - 1]['url']))
 			sendms.set_footer(text='Extracted from {} | FireEqualizer from FFmpeg'.format(info['extractor']))
 			await editms.edit(content=None, embed=sendms)
+			await save()
 	elif command == 'skip':
 		arg = message.content.split(' ')
 		if len(arg) == 1:
