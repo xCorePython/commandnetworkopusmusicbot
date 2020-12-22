@@ -1,4 +1,4 @@
-import discord, youtube_dl, subprocess, calendar, datetime, asyncio, json, os, advancedtime, requests, player
+import discord, youtube_dl, subprocess, datetime, json, advancedtime, player
 
 sys_token = 'NzYxOTI5NDgxNDIxOTc5NjY5.X3hwIA.ItlW0Q2Fej-OyNdbfUKO2czZQvk'
 sys_token2 = 'NzYwNDkwNjYwNDQzODQ4NzM0.X3M0Hg.lTDx_AvmNNr1spqwUo1wqetaVlM'
@@ -65,7 +65,6 @@ async def commands(command, message):
 			sendms.set_thumbnail(url=str(info['thumbnails'][len(info['thumbnails']) - 1]['url']))
 			sendms.set_footer(text='Extracted from {} | FireEqualizer from FFmpeg'.format(info['extractor']))
 			await editms.edit(content=None, embed=sendms)
-			await save()
 	elif command == 'skip':
 		arg = message.content.split(' ')
 		if len(arg) == 1:
@@ -76,7 +75,7 @@ async def commands(command, message):
 				q.skip(1)
 				await message.channel.send(':fast_forward: **Skipped**')
 			if int(arg[1]) > 1000000:
-				await message.channel.send('**Sorry. I can\'t skip over 1000000 songs. Please use 1-999999**')
+				await message.channel.send('**Sorry. I can\'t skip over 1000000 songs. Please use 1-1000000**')
 			else:
 				q.skip(int(arg[1]))
 				await message.channel.send(':fast_forward: **{} songs skipped**'.format(arg[1]))
@@ -136,6 +135,7 @@ async def on_ready():
 		    download(links[n])
 		print('Loaded queue')
 		first.append('Converted')
+	q.seteq({'options': '-vn -af \"firequalizer=gain_entry=\'entry(0,6);entry(10,3);entry(30,-5);entry(5000,-5);entry(8000, -2.5);entry(9000,10);entry(22000,10)\'\"',})
 	try:
 		await client.get_channel(vcch).connect(reconnect=10)
 		q.set(client.get_channel(vcch).guild.voice_client)
@@ -145,9 +145,9 @@ async def on_ready():
 	while sys_loop == 1:
 		try:
 			await np()
+			await asyncio.sleep(2)
 		except:
 			await asyncio.sleep(2)
-		await asyncio.sleep(2)
 
 @client.event
 async def on_message(message):
