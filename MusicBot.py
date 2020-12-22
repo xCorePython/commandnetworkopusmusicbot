@@ -1,4 +1,4 @@
-import discord, youtube_dl, subprocess, datetime, json, advancedtime, player, os
+import discord, asyncio, youtube_dl, subprocess, datetime, json, advancedtime, player, os
 
 sys_token = 'NzYxOTI5NDgxNDIxOTc5NjY5.X3hwIA.ItlW0Q2Fej-OyNdbfUKO2czZQvk'
 sys_token2 = 'NzYwNDkwNjYwNDQzODQ4NzM0.X3M0Hg.lTDx_AvmNNr1spqwUo1wqetaVlM'
