@@ -1,4 +1,4 @@
-import discord, asyncio, youtube_dl, subprocess, datetime, json, advancedtime, player, os
+import discord, youtube_dl, subprocess, datetime, json, advancedtime, player, os
 
 sys_token = 'NzYxOTI5NDgxNDIxOTc5NjY5.X3hwIA.ItlW0Q2Fej-OyNdbfUKO2czZQvk'
 sys_token2 = 'NzYwNDkwNjYwNDQzODQ4NzM0.X3M0Hg.lTDx_AvmNNr1spqwUo1wqetaVlM'
@@ -136,7 +136,7 @@ async def on_ready():
 		    download(links[n])
 		print('Loaded queue')
 		first.append('Converted')
-	q.seteq({'options': '-vn -af \"firequalizer=gain_entry=\'entry(0,6);entry(10,3);entry(30,-5);entry(5000,-5);entry(8000, -2.5);entry(9000,10);entry(22000,10)\'\"',})
+	q.seteq({'options': '-vn -af \"firequalizer=gain_entry=\'entry(0,6);entry(10,3);entry(30,-5);entry(2500,-5);entry(8000, 0);entry(9000,10);entry(22000,10)\'\"',})
 	try:
 		await client.get_channel(vcch).connect(reconnect=10)
 		q.set(client.get_channel(vcch).guild.voice_client)
