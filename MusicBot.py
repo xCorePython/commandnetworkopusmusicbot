@@ -139,12 +139,6 @@ async def on_ready():
 	except:
 		q.set(client.get_channel(vcch).guild.voice_client)
 	q.start()
-	while sys_loop == 1:
-		try:
-			await np()
-			await asyncio.sleep(2)
-		except:
-			await asyncio.sleep(2)
 
 @client.event
 async def on_message(message):
