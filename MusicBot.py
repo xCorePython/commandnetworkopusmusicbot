@@ -313,4 +313,4 @@ async def savequeue(value):
 	    except:
 	    	await message.channel.send(value)
 
-client.run(sys_token)
+client.run(os.getenv('DISCORD_TOKEN'))
