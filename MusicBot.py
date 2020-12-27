@@ -2,7 +2,7 @@ import discord, youtube_dl, subprocess, datetime, json, advancedtime, player, os
 
 sys_loop = 1
 command_prefix = os.getenv('BOT_PREFIX')
-client = discord.Client(activity=discord.Game('Loading queue... | {}help | v2.3.8'.format(command_prefix)))
+client = discord.Client(activity=discord.Game('Loading queue... | {}play | v2.3.9'.format(command_prefix)))
 vcch = int(os.getenv('VCID'))
 queuech = int(os.getenv('QUEUEID'))
 reverse = advancedtime.fetchtime
@@ -139,7 +139,7 @@ async def on_ready():
 	except:
 		q.set(client.get_channel(vcch).guild.voice_client)
 	q.start()
-	await client.change_presence(activity=discord.Game('{}help | v2.8.3'.format(command_prefix)))
+	await client.change_presence(activity=discord.Game('{}play | v2.3.9'.format(command_prefix)))
 
 @client.event
 async def on_message(message):
