@@ -3,9 +3,8 @@ import discord, youtube_dl, subprocess, datetime, json, advancedtime, player, os
 sys_loop = 1
 command_prefix = os.getenv('BOT_PREFIX')
 client = discord.Client()
-vcch = 734217960222228490
-#vcch = 584262828807028746
-queuech = 774525604116037662
+vcch = os.getenv('VCID')
+queuech = os.getenv('QUEUEID')
 reverse = advancedtime.fetchtime
 now_date = advancedtime.checktime
 now_month = advancedtime.checkmonth
