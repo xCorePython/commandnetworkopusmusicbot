@@ -127,14 +127,14 @@ async def on_ready():
 	print('Bot Started')
 	if len(first) == 1:
 		print('Loading queue...')
-		links = str(await create_queue(774525604116037662)).split('\n')
+		links = str(await create_queue()).split('\n')
 		for n in range(len(links)):
 		    download(links[n])
 		print('Loaded queue')
 		first.append('Converted')
 	q.seteq({'options': '-vn -af \"firequalizer=gain_entry=\'entry(0,6);entry(10,3);entry(30,-5);entry(2500,-5);entry(8000, 0);entry(9000,10);entry(22000,10)\'\"',})
 	try:
-		await client.get_channel(vcch).connect(reconnect=10)
+		await client.get_channel(vcch).connect(timeout=3000, reconnect=3)
 		q.set(client.get_channel(vcch).guild.voice_client)
 	except:
 		q.set(client.get_channel(vcch).guild.voice_client)
@@ -233,8 +233,8 @@ async def on_message(message):
 		except:
 			await message.channel.send(':x: **Failed run command**')
 
-async def create_queue(channelid):
-	messages = await client.get_channel(channelid).history(limit=1).flatten()
+async def create_queue():
+	messages = await client.get_channel(queuech).history(limit=1).flatten()
 	for message in messages:
 		return message.content
 
@@ -246,7 +246,6 @@ async def np():
 def finalize(info_dict):
 	try:
 		if os.path.isfile('{}.m4a'.format(info_dict['id'])):
-			#convert = subprocess.run("ffmpeg -i {0}.m4a -af \"firequalizer=gain_entry=\'entry(0,4);entry(100,0.5);entry(250,0);entry(7000,0);entry(9000,1.5);entry(16000,9);entry(40000,9)\'\" -vn -b:a 192000 -c:a libmp3lame -n {0}.mp3".format(info_dict['id']), shell=True)
 			data = json.loads(subprocess.run("ffprobe -i {}.m4a -print_format json -show_streams  -show_format -loglevel quiet".format(info_dict['id']), stdout=subprocess.PIPE, shell=True).stdout)
 			info_dict['format'] = data['format']
 			info_dict['streams'] = data['streams']
