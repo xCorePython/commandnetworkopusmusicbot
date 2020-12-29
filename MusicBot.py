@@ -131,7 +131,7 @@ async def commands(command, message):
 @client.event
 async def on_ready():
 	print('Bot Started')
-	q.seteq({'options': '-vn -af \"firequalizer=gain_entry=\'entry(0,6);entry(10,3);entry(30,-5);entry(2500,-5);entry(8000, 0);entry(9000,10);entry(22000,10)\'\"',})
+	q.seteq({'options': '-vn -af \"firequalizer=gain_entry=\'entry(0,6);entry(2,2);entry(10,-2);entry(2500,-2);entry(6300,-4);entry(16000,10);entry(22000,10)\'\"',})
 	try:
 		await client.get_channel(vcch).connect(timeout=10000)
 		q.set(client.get_channel(vcch).guild.voice_client)
