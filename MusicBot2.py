@@ -23,7 +23,7 @@ ydl_opts = {
     'postprocessors': [{
     	'key': 'FFmpegExtractAudio',
     	'preferredcodec': 'opus',
-        'preferredquality': '192'},
+        'preferredquality': '320'},
         {'key': 'FFmpegMetadata'},],
 }
 ydl = youtube_dl.YoutubeDL(ydl_opts)
@@ -131,7 +131,7 @@ async def commands(command, message):
 @client.event
 async def on_ready():
 	print('Bot Started')
-	q.seteq({'options': '-vn -af \"firequalizer=gain_entry=\'entry(0,6);entry(2,2);entry(10,-2);entry(2500,-2);entry(6300,-4);entry(16000,10);entry(22000,10)\'\"',})
+	q.seteq({'options': '-vn -ac 2 -af \"firequalizer=gain_entry=\'entry(0,6);entry(2,2);entry(10,-2);entry(2500,-2);entry(6300,-4);entry(16000,10);entry(22000,10)\'\"',})
 	try:
 		await client.get_channel(vcch).connect(timeout=10000)
 		q.set(client.get_channel(vcch).guild.voice_client)
