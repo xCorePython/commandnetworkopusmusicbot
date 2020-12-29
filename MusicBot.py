@@ -2,7 +2,7 @@ import discord, youtube_dl, subprocess, datetime, json, advancedtime, player, os
 
 sys_loop = 1
 command_prefix = os.getenv('BOT_PREFIX')
-client = discord.Client(activity=discord.Game('Loading queue... | {}play | v2.3.9'.format(command_prefix)))
+client = discord.Client()
 vcch = int(os.getenv('VCID'))
 queuech = int(os.getenv('QUEUEID'))
 reverse = advancedtime.fetchtime
@@ -20,7 +20,13 @@ ydl_opts = {
 	'noplaylist': True,
 	'quiet': True,
 	'no-overwrite': True,
+    'postprocessors': [{
+    	'key': 'FFmpegExtractAudio',
+    	'preferredcodec': 'opus',
+        'preferredquality': '192'},
+        {'key': 'FFmpegMetadata'},],
 }
+ydl = youtube_dl.YoutubeDL(ydl_opts)
 
 async def commands(command, message):
 	arg = message.content.split(' ')[1:]
@@ -40,8 +46,8 @@ async def commands(command, message):
 		sendms.add_field(name='Time', value='{} / {}'.format(reverse(nowpl),reverse(info['duration'])),inline=False)
 		sendms.add_field(name='Codec', value=info['streams'][0]['codec_long_name'], inline=False)
 		sendms.add_field(name='Bitrate', value='{}kbps / {}'.format(str(int(info['format']['bit_rate'])/1000),  info['streams'][0]['channel_layout']), inline=False)
-		sendms.add_field(name='Volume', value='{}%'.format(str(int(float(client.get_channel(vcch).guild.voice_client.source.volume)*100))), inline=False)
-		sendms.add_field(name='Equalizer', value='Bass: x5.0 Truble: x9.0')
+		sendms.add_field(name='Volume', value='100%(Can\'t Change)', inline=False)
+		sendms.add_field(name='Equalizer', value='Bass: x7.0 Truble: x10.0')
 		sendms.set_thumbnail(url=str(info['thumbnails'][len(info['thumbnails']) - 1]['url']))
 		sendms.set_footer(text='Started at {} | FireEqualizer from FFmpeg'.format(start2))
 		await message.channel.send(embed=sendms)
@@ -125,6 +131,12 @@ async def commands(command, message):
 @client.event
 async def on_ready():
 	print('Bot Started')
+	q.seteq({'options': '-vn -af \"firequalizer=gain_entry=\'entry(0,6);entry(10,3);entry(30,-5);entry(2500,-5);entry(8000, 0);entry(9000,10);entry(22000,10)\'\"',})
+	try:
+		await client.get_channel(vcch).connect(timeout=10000)
+		q.set(client.get_channel(vcch).guild.voice_client)
+	except:
+		q.set(client.get_channel(vcch).guild.voice_client)
 	if len(first) == 1:
 		print('Loading queue...')
 		links = str(await create_queue()).split('\n')
@@ -132,14 +144,6 @@ async def on_ready():
 		    download(links[n])
 		print('Loaded queue')
 		first.append('Converted')
-	q.seteq({'options': '-vn -af \"firequalizer=gain_entry=\'entry(0,6);entry(10,3);entry(30,-5);entry(2500,-5);entry(8000, 0);entry(9000,10);entry(22000,10)\'\"',})
-	try:
-		await client.get_channel(vcch).connect(timeout=3000, reconnect=3)
-		q.set(client.get_channel(vcch).guild.voice_client)
-	except:
-		q.set(client.get_channel(vcch).guild.voice_client)
-	q.start()
-	await client.change_presence(activity=discord.Game('{}play | v2.3.9'.format(command_prefix)))
 
 @client.event
 async def on_message(message):
@@ -247,16 +251,17 @@ async def np():
 def finalize(info_dict):
 	try:
 		if os.path.isfile('{}.m4a'.format(info_dict['id'])):
-			data = json.loads(subprocess.run("ffprobe -i {}.m4a -print_format json -show_streams  -show_format -loglevel quiet".format(info_dict['id']), stdout=subprocess.PIPE, shell=True).stdout)
+			convert = subprocess.run("ffmpeg -i {0}.m4a -vn -b:a 192000 -c:a libopus -n {0}.opus".format(info_dict['id']), shell=True)
+			data = json.loads(subprocess.run("ffprobe -i {}.opus -print_format json -show_streams  -show_format -loglevel quiet".format(info_dict['id']), stdout=subprocess.PIPE, shell=True).stdout)
 			info_dict['format'] = data['format']
 			info_dict['streams'] = data['streams']
-			info_dict['path'] = info_dict['id'] + '.m4a'
+			info_dict['path'] = info_dict['id'] + '.opus''
 			return info_dict
 		else:
-			data = json.loads(subprocess.run("ffprobe -i {}.webm -print_format json -show_streams  -show_format -loglevel quiet".format(info_dict['id']), stdout=subprocess.PIPE, shell=True).stdout)
+			data = json.loads(subprocess.run("ffprobe -i {}.opus -print_format json -show_streams  -show_format -loglevel quiet".format(info_dict['id']), stdout=subprocess.PIPE, shell=True).stdout)
 			info_dict['format'] = data['format']
 			info_dict['streams'] = data['streams']
-			info_dict['path'] = info_dict['id'] + '.webm'
+			info_dict['path'] = info_dict['id'] + '.opus''
 			return info_dict
 	except:
 		return 'Failed'
@@ -269,11 +274,11 @@ def download(value):
 				info_dict = youtube_dl.YoutubeDL(ydl_opts).extract_info(value, download=True, process=True)
 				finalize(info_dict)
 			else:
-				search = youtube_dl.YoutubeDL(ydl_opts).extract_info("ytsearch:{}".format(value), download=False, process=True)
+				search = ydl.extract_info("ytsearch:{}".format(value), download=False, process=True)
 				if not search:
 					error = raiseerror
 				else:
-					download  =  youtube_dl.YoutubeDL(ydl_opts).extract_info('https://youtu.be/{}'.format(search['entries'][0]['id']), download=True, process=True)
+					download  =  ydl.extract_info('https://youtu.be/{}'.format(search['entries'][0]['id']), download=True, process=True)
 					info_dict = finalize(download)
 			if info_dict == 'Failed':
 				error = raiseerror
