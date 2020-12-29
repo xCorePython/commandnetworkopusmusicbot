@@ -255,13 +255,13 @@ def finalize(info_dict):
 			data = json.loads(subprocess.run("ffprobe -i {}.opus -print_format json -show_streams  -show_format -loglevel quiet".format(info_dict['id']), stdout=subprocess.PIPE, shell=True).stdout)
 			info_dict['format'] = data['format']
 			info_dict['streams'] = data['streams']
-			info_dict['path'] = info_dict['id'] + '.opus''
+			info_dict['path'] = info_dict['id'] + '.opus'
 			return info_dict
 		else:
 			data = json.loads(subprocess.run("ffprobe -i {}.opus -print_format json -show_streams  -show_format -loglevel quiet".format(info_dict['id']), stdout=subprocess.PIPE, shell=True).stdout)
 			info_dict['format'] = data['format']
 			info_dict['streams'] = data['streams']
-			info_dict['path'] = info_dict['id'] + '.opus''
+			info_dict['path'] = info_dict['id'] + '.opus'
 			return info_dict
 	except:
 		return 'Failed'
